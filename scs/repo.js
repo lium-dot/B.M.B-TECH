@@ -21,7 +21,7 @@ const quotedContact = {
 bmbtz({ nomCom: "repo", categorie: "General" }, async (dest, zk, commandeOptions) => {
     let { ms, repondre } = commandeOptions;
 
-    const repoUrl = "https://api.github.com/repos/bmbxmd1/BMB-XMD";
+    const repoUrl = "https://api.github.com/repos/Dev-bmbtech/BMB-TECH";
     const repoLink = "https://github.com/Dev-bmbtech/BMB-TECH";
     const channelLink = "https://whatsapp.com/channel/0029VawO6hgF6sn7k3SuVU3z";
 
