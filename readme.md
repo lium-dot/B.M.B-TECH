@@ -54,7 +54,7 @@
 
 > Click below to deploy on Heroku easily:
 <p align="left">
-  <a href="https://dashboard.heroku.com/new?template=https://github.com/Dev-bmbtech/BMB-TECH">
+  <a href="https://dashboard.heroku.com/new?template=https://github.com/benni8090/BMB-TECH">
     <img src="https://img.shields.io/badge/Deploy%20to%20Heroku-6762a6?style=for-the-badge&logo=heroku&logoColor=white"/>
   </a>
 </p>
