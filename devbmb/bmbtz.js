@@ -14,3 +14,4 @@ function bmbtz(obj, fonctions) {
     return infoComs;
 }
 module.exports = { bmbtz, Module: bmbtz, cm };
+
