@@ -10,7 +10,7 @@ const DATABASE_URL = process.env.DATABASE_URL === undefined
 
 module.exports = {
     session: process.env.SESSION_ID || '',
-    PREFIXE: process.env.PREFIX || ".",
+    PREFIXE: process.env.PREFIX || "+",
     OWNER_NAME: process.env.OWNER_NAME || "B.M.B-TECH",
     NUMERO_OWNER : process.env.NUMERO_OWNER || "25576786×××××",              
     AUTO_READ_STATUS: process.env.AUTO_READ_STATUS || "yes",
@@ -26,10 +26,11 @@ module.exports = {
     ANTICALL : process.env.ANTICALL || 'yes',   
     AUTO_BIO : process.env.AUTO_BIO || 'yes',               
     DP : process.env.STARTING_BOT_MESSAGE || "yes",
-    ANTIDELETE : process.env.ANTI_DELETE_MESSAGE || 'no',
+    ANTIDELETE1 : process.env.ANTI_DELETE_MESSAGE || 'no',
     AUTO_REACT : process.env.AUTO_REACT || 'no',
-    AUTOREACT_STATUS : process.env.AUTOREACT_STATUS || 'yes',
+    AUTO_REACT_STATUS : process.env.AUTO_REACT_STATUS || 'yes',
     AUTO_READ : process.env.AUTO_READ || 'yes',
+    AUTO_SAVE_CONTACTS : process.env.AUTO_SAVE_CONTACTS || 'yes',
     CHATBOT: process.env.CHATBOT || 'yes',
     DATABASE_URL,
     DATABASE: DATABASE_URL === databasePath

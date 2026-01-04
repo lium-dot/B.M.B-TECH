@@ -1,12 +1,12 @@
 {
-  "name":"BMB-TECH",
-  "description":"tryphonee",
-  "keywords":["bot","node","baileys","whatsapp"],
-  "logo":"https://i.ibb.co/pvKHf9LV/IMG-20250704-WA0263.jpg",
-  "repository":"https://github.com/dev-bmbtech/BMB-TECH",
-  "succes_url":"/",
-  "stack":"container",
-  "env":{
+  "name": "B.M.B-TECH",
+  "description": "ʙᴇsᴛ ᴡʜᴀᴛsᴀᴘᴘ ʙᴏᴛ ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ʙᴍʙ ᴛᴇᴄʜ 🇹🇿",
+  "keywords": ["bot", "node", "baileys", "whatsapp"],
+  "logo": "https://files.catbox.moe/hflcbc.jpg",
+  "repository": "https://github.com/ekitale/maths-project",
+  "succes_url": "/",
+  "stack": "heroku-24",
+  "env": {
     "PREFIX": {
       "description": "choose your prefix of bot",
       "value": ".",
@@ -122,17 +122,15 @@
       "required": false
     }
   },
-
-  "formation": {
-		"worker": {
-			"quantity": 1,
-			"size": "basic"
-		}
-	},
-
-  "addons":[
+  "buildpacks": [
     {
-      "plan":"heroku-postgresql"
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
     }
   ]
-}
+  }
