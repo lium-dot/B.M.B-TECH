@@ -111,4 +111,4 @@ Lien: ${result.url}
     console.error('Erreur lors du téléchargement de la vidéo :', error);
     repondre('Erreur lors du téléchargement de la vidéo.', error);
   }
-});a
+});
