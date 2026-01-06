@@ -14,7 +14,7 @@ const quotedContact = {
   message: {
     contactMessage: {
       displayName: "B.M.B VERIFIED ✅",
-      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=255767862457:+255772341432\nEND:VCARD"
+      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=255767862457:+254769529791\nEND:VCARD"
     }
   }
 };
@@ -47,16 +47,16 @@ bmbtz({
   let introText = `
 ╭━━✧★☞  𝗕.𝗠.𝗕-𝗧𝗘𝗖𝗛 ✧━━❖
 ┊✺┌────••••────⊷
-┃★│◎ Owner : ${s.OWNER_NAME}
+┃★│◎ Owner : ${s.BOT_NAME}
 ┃★│◎ Prefix : [ ${s.PREFIXE} ]
 ┃★│◎ Mode : ${mode}
-┃★│◎ Ram : 8/132 GB
+┃★│◎ Ram : 12/228 GB
 ┃★│◎ Date : ${date}
 ┃★│◎ Platform : ${os.platform()}
 ┃★│◎ Creator : bmb tech 
 ┃★│◎ Commands : ${cm.length}
 ┊★└────••••────⊷
-╰━━━••✧B.M.B TECH✧••━━━◆
+╰━━━••✧ 𝐛𝐦𝐛 𝐭𝐞𝐜𝐡 ✧••━━━◆
 `;
 
   let menuText = "";
