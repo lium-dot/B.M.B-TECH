@@ -18,7 +18,7 @@ bmbtz({
 ╭───[ 𝗕.𝗠.𝗕-𝗧𝗘𝗖𝗛 𝗣𝗜𝗡𝗚 ]───⬣
 │ 📅 Date: ${date}
 │ 🕒 Time: ${time}
-│ 👑 Owner: *${settings.OWNER_NAME}*
+│ 👑 Owner: *${settings.BOT_NAME}*
 ╰───────────⬣`;
 
   // Friend's Blue Tick vCard
@@ -31,7 +31,7 @@ bmbtz({
     message: {
       contactMessage: {
         displayName: "B.M.B TECH VERIFIED ✅",
-        vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B TECH VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
+        vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B TECH VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=254769529791:+254769529791\nEND:VCARD"
       }
     }
   };
