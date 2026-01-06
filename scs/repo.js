@@ -22,8 +22,6 @@ bmbtz({ nomCom: "repo", categorie: "General" }, async (dest, zk, commandeOptions
     let { ms, repondre } = commandeOptions;
 
     const repoUrl = "https://api.github.com/repos/Dev-bmbtech/BMB-TECH";
-    const repoLink = "https://github.com/Dev-bmbtech/BMB-TECH";
-    const channelLink = "https://whatsapp.com/channel/0029VawO6hgF6sn7k3SuVU3z";
 
     // Random image from /scs folder
     const scsFolder = path.join(__dirname, "../scs");
@@ -32,12 +30,12 @@ bmbtz({ nomCom: "repo", categorie: "General" }, async (dest, zk, commandeOptions
     const imagePath = path.join(scsFolder, randomImage);
 
     try {
-      const response = await axios.get(repoUrl);
-      const repo = response.data;
+        const response = await axios.get(repoUrl);
+        const repo = response.data;
 
-      let repoInfo = `
+        let repoInfo = `
 ╭══════════════⊷❍
-┃ *BMB TECH REPOSITORY*
+┃ *B.M.B TECH REPOSITORY*
 ┃══════════════════
 ┃ ❏ Name: *${repo.name}*
 ┃ ❏ Owner: *${repo.owner.login}*
@@ -48,40 +46,26 @@ bmbtz({ nomCom: "repo", categorie: "General" }, async (dest, zk, commandeOptions
 ┃ ❏ Last Updated: 📅 *${new Date(repo.updated_at).toLocaleString()}*
 ┃ ❏ Repo Link: 🔗 [Click Here](${repo.html_url})
 ╰══════════════⊷❍
-      `;
+        `;
 
-      const buttons = [
-        {
-          buttonText: { displayText: 'Visit Repository' },
-          buttonId: 'visit_repo',
-          url: repoLink
-        },
-        {
-          buttonText: { displayText: 'View Channel' },
-          buttonId: 'view_channel',
-          url: channelLink
-        }
-      ];
-
-      // Send repository info with random image and buttons
-      await zk.sendMessage(dest, {
-        image: { url: imagePath },
-        caption: repoInfo,
-        footer: "*BMB TECH GitHub Repository*",
-        buttons: buttons,
-        contextInfo: {
-          forwardingScore: 999,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: "120363382023564830@newsletter",
-            newsletterName: "𝙱.𝙼.𝙱-𝚇𝙼𝙳",
-            serverMessageId: 1
-          }
-        }
-      }, { quoted: quotedContact });
+        // Send repository info with random image
+        await zk.sendMessage(dest, {
+            image: { url: imagePath },
+            caption: repoInfo,
+            footer: "*BMB TECH GitHub Repository*",
+            contextInfo: {
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: "120363382023564830@newsletter",
+                    newsletterName: "𝙱.𝙼.𝙱-𝚇𝙼𝙳",
+                    serverMessageId: 1
+                }
+            },
+        }, { quoted: quotedContact });
 
     } catch (e) {
-      console.log("❌ Error fetching repository data: " + e);
-      repondre("❌ Error fetching repository data, please try again later.");
+        console.log("❌ Error fetching repository data: " + e);
+        repondre("❌ Error fetching repository data, please try again later.");
     }
 });
