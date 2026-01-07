@@ -1,38 +1,12 @@
 const { bmbtz } = require('../devbmb/bmbtz');
 const pkg = require('@whiskeysockets/baileys');
 const { generateWAMessageFromContent, proto } = pkg;
+const fetch = require('node-fetch'); 
 
-// VCard Contact
-const quotedContact = {
-  key: {
-    fromMe: false,
-    participant: '0@s.whatsapp.net',
-    remoteJid: 'status@broadcast'
-  },
-  message: {
-    contactMessage: {
-      displayName: 'B.M.B VERIFIED ✅',
-      vcard:
-        'BEGIN:VCARD\n' +
-        'VERSION:3.0\n' +
-        'FN:B.M.B VERIFIED ✅\n' +
-        'ORG:BMB-TECH BOT;\n' +
-        'TEL;type=CELL;type=VOICE;waid=254700000001:+254700000001\n' +
-        'END:VCARD'
-    }
-  }
-};
-
-// Newsletter context
-const newsletterContext = {
-  forwardingScore: 999,
-  isForwarded: true,
-  forwardedNewsletterMessageInfo: {
-    newsletterJid: '120363382023564830@newsletter',
-    newsletterName: '𝙱.𝙼.𝙱-𝚇𝙼𝙳',
-    serverMessageId: 1
-  }
-};
+// API mpya
+const apiKey = "";
+const davidApiUrl = (query) =>
+  `https://apis.davidcyriltech.my.id/ai/chatbot?query=${encodeURIComponent(query)}&apikey=${apiKey}`;
 
 bmbtz({ nomCom: 'gpt', reaction: '🤦', categorie: 'bmbai' }, async (from, conn, ctx) => {
   const { arg, repondre } = ctx;
@@ -42,19 +16,39 @@ bmbtz({ nomCom: 'gpt', reaction: '🤦', categorie: 'bmbai' }, async (from, conn
       return repondre('Hello.\n\nWhat help can I offer you today?');
     }
 
-    const prompt = arg.join(' ');
-    const res = await fetch(
-      `https://api.gurusensei.workers.dev/llama?prompt=${encodeURIComponent(prompt)}`
-    );
-    const json = await res.json();
+    const prompt = arg.join(' ').trim().toLowerCase();
 
-    if (!json?.response?.response) {
-      throw new Error('Invalid API response');
+    // Logic ya "name recognition"
+    if (
+      prompt.includes("unaitwa nani") ||
+      prompt.includes("what is your name") ||
+      prompt.includes("jina lako ni nani")
+    ) {
+      return repondre("My name is Bmb Tech");
     }
 
-    const answer = json.response.response;
+    // Fallback GPT API
+    let answer = "";
+    try {
+      // Jaribu API mpya ya David Cyril Tech
+      const res = await fetch(davidApiUrl(prompt));
+      const json = await res.json();
+      if (json?.response) {
+        answer = json.response;
+      } else {
+        throw new Error("David API failed, fallback to GPT");
+      }
+    } catch (err) {
+      // Fallback kwa GPT API ya awali
+      const gptRes = await fetch(
+        `https://api.gurusensei.workers.dev/llama?prompt=${encodeURIComponent(prompt)}`
+      );
+      const gptJson = await gptRes.json();
+      if (!gptJson?.response?.response) throw new Error("Invalid GPT API response");
+      answer = gptJson.response.response;
+    }
 
-    // COPY button
+    // COPY + NEWSLETTER buttons
     const buttons = [
       {
         name: 'cta_copy',
@@ -62,6 +56,22 @@ bmbtz({ nomCom: 'gpt', reaction: '🤦', categorie: 'bmbai' }, async (from, conn
           display_text: 'COPY RESPONSE',
           id: 'copy_gpt',
           copy_code: answer
+        })
+      },
+      {
+        name: 'cta_newsletter',
+        buttonParamsJson: JSON.stringify({
+          display_text: 'JOIN NEWSLETTER',
+          id: 'newsletter_join',
+          newsletter_jid: newsletterJid || ''
+        })
+      },
+      {
+        name: 'cta_verify',
+        buttonParamsJson: JSON.stringify({
+          display_text: 'VERIFY CONTACT',
+          id: 'contact_verify',
+          contact_jid: contactVerify || ''
         })
       }
     ];
@@ -83,14 +93,13 @@ bmbtz({ nomCom: 'gpt', reaction: '🤦', categorie: 'bmbai' }, async (from, conn
                 text: '> *B.M.B-TECH*'
               }),
               header: proto.Message.InteractiveMessage.Header.create({
-                title: '',
-                subtitle: '',
+                title: 'GPT RESPONSE',
+                subtitle: 'Powered by B.M.B-TECH',
                 hasMediaAttachment: false
               }),
-              nativeFlowMessage:
-                proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                  buttons
-                })
+              nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                buttons
+              })
             })
           }
         }
@@ -98,7 +107,7 @@ bmbtz({ nomCom: 'gpt', reaction: '🤦', categorie: 'bmbai' }, async (from, conn
       {
         contextInfo: {
           ...newsletterContext,
-          quotedMessage: quotedContact.message
+          quotedMessage: quotedContact?.message
         }
       }
     );
@@ -107,6 +116,6 @@ bmbtz({ nomCom: 'gpt', reaction: '🤦', categorie: 'bmbai' }, async (from, conn
 
   } catch (err) {
     console.error(err);
-    repondre('Error getting response.');
+    repondre(`Error getting response: ${err.message}`);
   }
 });
