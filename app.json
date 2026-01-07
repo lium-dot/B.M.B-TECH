@@ -49,7 +49,7 @@
     },
     "BOT_NAME": {
       "description": "put A name for your bot",
-      "value": "B.M.B-TECH",
+      "value": "Bmb Tech",
       "required": false
     },
     "BOT_MENU_LINKS": {
