@@ -1,11 +1,11 @@
 const { bmbtz } = require("../devbmb/bmbtz");
-const fancy = require("../scs/style");
+const fancy = require("../devbmb/style");
 
 // VCard Contact
 const quotedContact = {
   key: {
     fromMe: false,
-    participant: `0@s.whatsapp.net`,
+    participant: "0@s.whatsapp.net",
     remoteJid: "status@broadcast"
   },
   message: {
@@ -13,17 +13,6 @@ const quotedContact = {
       displayName: "B.M.B VERIFIED ✅",
       vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=255767862457:+255767862457\nEND:VCARD"
     }
-  }
-};
-
-// Newsletter context
-const newsletterContext = {
-  forwardingScore: 999,
-  isForwarded: true,
-  forwardedNewsletterMessageInfo: {
-    newsletterJid: "120363382023564830@newsletter",
-    newsletterName: "𝙱.𝙼.𝙱-𝚇𝙼𝙳",
-    serverMessageId: 1
   }
 };
 
@@ -39,24 +28,45 @@ bmbtz(
     const text = arg.slice(1).join(" ");
 
     try {
-      if (id === undefined || text === undefined) {
-        return await zk.sendMessage(dest, {
-          text: `\nExemple : ${prefixe}fancy 10 bmb tech\n` + String.fromCharCode(8206).repeat(4001) + fancy.list('B.M.B-TECH', fancy),
-          contextInfo: newsletterContext
-        }, { quoted: quotedContact });
+      if (!id || !text) {
+        return await zk.sendMessage(
+          dest,
+          {
+            text:
+              `Example: ${prefixe}fancy 10 bmb tech\n\n` +
+              String.fromCharCode(8206).repeat(4001) +
+              fancy.list("B.M.B-TECH", fancy)
+          },
+          { quoted: quotedContact }
+        );
       }
 
       const selectedStyle = fancy[parseInt(id) - 1];
-      const resultText = selectedStyle ? fancy.apply(selectedStyle, text) : '_Style introuvable :(_';
+      if (!selectedStyle) return repondre("❌ Invalid style number.");
 
-      return await zk.sendMessage(dest, {
-        text: resultText,
-        contextInfo: newsletterContext
-      }, { quoted: quotedContact });
+      const resultText = fancy.apply(selectedStyle, text);
+
+      // Send fancy text with COPY button
+      await zk.sendMessage(
+        dest,
+        {
+          text: resultText,
+          footer: "Tap COPY to copy the styled text",
+          buttons: [
+            {
+              buttonId: resultText,
+              buttonText: { displayText: "📋 COPY" },
+              type: 1
+            }
+          ],
+          headerType: 1
+        },
+        { quoted: quotedContact }
+      );
 
     } catch (error) {
       console.error(error);
-      return await repondre('_Une erreur s\'est produite :(_');
+      repondre("❌ An error occurred.");
     }
   }
 );
