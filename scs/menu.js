@@ -47,7 +47,7 @@ bmbtz({
   let introText = `
 ╭━━✧★☞  𝗕.𝗠.𝗕-𝗧𝗘𝗖𝗛 ✧━━❖
 ┊✺┌────••••────⊷
-┃★│◎ Owner : ${s.BOT_NAME}
+┃★│◎ Owner : ${s.BOT}
 ┃★│◎ Prefix : [ ${s.PREFIXE} ]
 ┃★│◎ Mode : ${mode}
 ┃★│◎ Ram : 12/228 GB
