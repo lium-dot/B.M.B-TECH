@@ -1,5 +1,6 @@
 const { bmbtz } = require("../devbmb/bmbtz");
 const fancy = require("../devbmb/style");
+const { sendButtons } = require("gifted-btns");
 
 // VCard Contact
 const quotedContact = {
@@ -11,7 +12,8 @@ const quotedContact = {
   message: {
     contactMessage: {
       displayName: "B.M.B VERIFIED ✅",
-      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=255767862457:+255767862457\nEND:VCARD"
+      vcard:
+        "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=255767862457:+255767862457\nEND:VCARD"
     }
   }
 };
@@ -23,11 +25,13 @@ bmbtz(
     reaction: "〽️"
   },
   async (dest, zk, commandeOptions) => {
-    const { arg, repondre, prefixe, ms } = commandeOptions;
-    const id = arg[0]?.match(/\d+/)?.join('');
+    const { arg, prefixe, repondre, ms } = commandeOptions;
+
+    const id = arg[0]?.match(/\d+/)?.join("");
     const text = arg.slice(1).join(" ");
 
     try {
+      // Show styles list
       if (!id || !text) {
         return await zk.sendMessage(
           dest,
@@ -46,27 +50,30 @@ bmbtz(
 
       const resultText = fancy.apply(selectedStyle, text);
 
-      // Send fancy text with COPY button
-      await zk.sendMessage(
+      // ✅ Send fancy text with COPY button (gifted-btns)
+      await sendButtons(
+        zk,
         dest,
         {
+          title: "",
           text: resultText,
-          footer: "Tap COPY to copy the styled text",
+          footer: "B.M.B TECH • Fancy Text",
           buttons: [
             {
-              buttonId: resultText,
-              buttonText: { displayText: "📋 COPY" },
-              type: 1
+              name: "cta_copy",
+              buttonParamsJson: JSON.stringify({
+                display_text: "📋 Copy Text",
+                copy_code: resultText
+              })
             }
-          ],
-          headerType: 1
+          ]
         },
         { quoted: quotedContact }
       );
 
     } catch (error) {
-      console.error(error);
-      repondre("❌ An error occurred.");
+      console.error("Fancy Error:", error);
+      repondre("❌ An error occurred while generating fancy text.");
     }
   }
 );
