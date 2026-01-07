@@ -15,7 +15,7 @@ const quotedContact = {
   message: {
     contactMessage: {
       displayName: "B.M.B VERIFIED ✅",
-      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
+      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254700000001\nEND:VCARD"
     }
   }
 };
@@ -49,26 +49,14 @@ bmbtz({ nomCom: "gpt", reaction: "🤦", categorie: "bmbai" }, async (dest, zk, 
       const msg = generateWAMessageFromContent(dest, {
         viewOnceMessage: {
           message: {
-            messageContextInfo: {
-              deviceListMetadata: {},
-              deviceListMetadataVersion: 2
-            },
-            interactiveMessage: proto.Message.InteractiveMessage.create({
-              body: proto.Message.InteractiveMessage.Body.create({
-                text: answer
-              }),
-              footer: proto.Message.InteractiveMessage.Footer.create({
-                text: "> *B.M.B-TECH🇹🇿*"
-              }),
-              header: proto.Message.InteractiveMessage.Header.create({
-                title: "",
-                subtitle: "",
-                hasMediaAttachment: false
-              }),
-              nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                buttons: []
-              })
-            })
+            messageContextInfo: contextInfo, // Hapa tunashirikisha newsletter context
+            extendedTextMessage: {
+              text: answer,
+              contextInfo: {
+                ...contextInfo,
+                quotedMessage: quotedContact.message // Hapa inatumika VCard verify
+              }
+            }
           }
         }
       }, {});
