@@ -1,15 +1,15 @@
 ![Typing SVG](https://readme-typing-svg.demolab.com?font=Ribeye&size=50&pause=1000&color=3F00FF&center=true&width=900&height=100&lines=B.M.B%20-TECH;%20𝗠𝗨𝗟𝗧𝗜-𝗗𝗘𝗩𝗜𝗖𝗘%20𝗪𝗛𝗔𝗧𝗦𝗔𝗣𝗣%20𝗕𝗢𝗧;%20𝗗𝗘𝗩𝗘𝗟𝗢𝗣𝗘𝗗%20𝗕𝗬%20B.M.B%20TECH..🤖)
 <p align="center"> 
 <p align="center">
-  <img src="https://files.catbox.moe/b0wsqm.jpg" width="250" alt="B.M.B-TECH Logo"/>
+  <img src="https://files.catbox.moe/c0u614.jpg" width="250" alt="B.M.B-TECH Logo"/>
 </p>
 ---
 <p align="center">
-  <a href="https://github.com/Dev-bmbtech/B.M.B-TECH/fork">
-    <img src="https://img.shields.io/github/forks/Dev-bmbtech/B.M.B-TECH?label=Forks&style=social" alt="GitHub Forks">
+  <a href="https://github.com/Dev-bmbtech/BMB-TECH/fork">
+    <img src="https://img.shields.io/github/forks/Dev-bmbtech/BMB-TECH?label=Forks&style=social" alt="GitHub Forks">
   </a>
-  <a href="https://github.com/Dev-bmbtech/B.M.B-TECH/stargazers">
-    <img src="https://img.shields.io/github/stars/Dev-bmbtech/B.M.B-TECH?style=social" alt="GitHub Stars">
+  <a href="https://github.com/Dev-bmbtech/BMB-TECH/stargazers">
+    <img src="https://img.shields.io/github/stars/Dev-bmbtech/BMB-TECH?style=social" alt="GitHub Stars">
   </a>
 </p>
 --
@@ -18,7 +18,7 @@
 ✅ Fork This Repo
 > Click below to fork this repository and start deploying.
 <p align="left">
-  <a href="https://github.com/Dev-bmbtech/B.M.B-TECH/fork">
+  <a href="https://github.com/Dev-bmbtech/BMB-TECH/fork">
     <img src="https://img.shields.io/badge/Fork%20This%20Repo-000000?style=for-the-badge&logo=github&logoColor=white"/>
   </a>
 </p>
