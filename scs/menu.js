@@ -45,7 +45,7 @@ bmbtz({
   const date = moment().format("DD/MM/YYYY");
 
   let introText = `
-╭━━✧★☞  𝗕.𝗠.𝗕-𝗧𝗘𝗖𝗛 ✧━━❖
+╭━━✧ Whatsapp Bot ✧━━❖
 ┊✺┌────••••────⊷
 ┃★│◎ Owner : ${s.BOT}
 ┃★│◎ Prefix : [ ${s.PREFIXE} ]
@@ -69,7 +69,7 @@ bmbtz({
     menuText += `\n║╰━━══••══━━••⊷\n╰════────════`;
   }
 
-  menuText += "\n> @B.M.B-TECH\n";
+  menuText += "\n> B.M.B-TECH\n";
 
   try {
     const folderPath = path.join(__dirname, "../scs");
