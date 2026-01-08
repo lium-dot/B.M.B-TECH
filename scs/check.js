@@ -39,7 +39,7 @@ function getFlagEmoji(countryCode) {
 
 bmbtz({
   nomCom: "check",
-  categorie: "tools",
+  categorie: "Search",
   reaction: "🌍"
 }, async (dest, zk, { arg, ms, repondre }) => {
   try {
