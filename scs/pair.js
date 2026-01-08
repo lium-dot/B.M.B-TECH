@@ -11,8 +11,7 @@ const quotedStatus = {
   message: {
     contactMessage: {
       displayName: "B.M.B VERIFIED ✅",
-      vcard: 
-`BEGIN:VCARD
+      vcard: `BEGIN:VCARD
 VERSION:3.0
 FN:B.M.B VERIFIED
 ORG:BMB-TECH;
@@ -33,14 +32,10 @@ bmbtz(
     const { arg, repondre, ms } = context;
 
     try {
-      // Kama hakuna number, chukua default
-      const number = arg[0] ? arg[0].replace(/\D/g, "") : "255767862457";
-
-      await zk.sendMessage(
-        dest,
-        { text: "⏳ *Generating Pair Code... Please wait...*" },
-        { quoted: quotedStatus }
-      );
+      // chukua namba: ikiwa ameweka tumia, la sivyo tumia ya sender
+      const number = arg[0]
+        ? arg[0].replace(/\D/g, "")
+        : ms.sender.split("@")[0];
 
       const apiUrl = `https://bmb-pair-site.onrender.com/code?number=${encodeURIComponent(number)}`;
       const { data } = await axios.get(apiUrl);
@@ -50,21 +45,21 @@ bmbtz(
       }
 
       const finalMessage = `
-🔐 *PAIRING SUCCESSFUL* 🔐
+🔐 *PAIRING READY* 🔐
 
 📱 *Number:* ${number}
+
+━━━━━━━━━━━━━━━
+📌 *How to use*
+━━━━━━━━━━━━━━━
+Open WhatsApp
+Linked Devices → Link a device
 
 ━━━━━━━━━━━━━━━
 🔑 *PAIR CODE*
 ━━━━━━━━━━━━━━━
 
 *${data.code}*
-
-━━━━━━━━━━━━━━━
-✅ Use this code on your WhatsApp
-📌 Linked Devices → Link a device
-
-🌐 *Powered by B.M.B-TECH*
 `;
 
       await zk.sendMessage(
