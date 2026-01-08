@@ -4,7 +4,7 @@ const axios = require("axios");
 bmbtz({
   nomCom: "lyrics",
   reaction: '🎵', // Changed reaction to match music theme
-  categorie: "Music",
+  categorie: "Search",
   aliases: ["lyric", "mistari"] // Added aliases
 }, async (dest, zk, commandeOptions) => {
   const { repondre, arg, ms } = commandeOptions;
