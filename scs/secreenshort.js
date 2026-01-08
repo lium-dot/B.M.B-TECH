@@ -3,7 +3,7 @@ const { bmbtz } = require("../devbmb/bmbtz");
 
 bmbtz({
   nomCom: "screenshot",
-  categorie: "Utility",
+  categorie: "Download",
   reaction: "📷"
 }, async (jid, sock, { arg, ms, repondre }) => {
   try {
