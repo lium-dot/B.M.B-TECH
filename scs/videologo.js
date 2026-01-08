@@ -41,7 +41,7 @@ const contextInfo = {
   }
 };
 
-bmbtz({ nomCom: "videologo", categorie: "modern-logo", reaction: "✋" }, async (dest, zk, commandeOptions) => {
+bmbtz({ nomCom: "videologo", categorie: "Download", reaction: "✋" }, async (dest, zk, commandeOptions) => {
   const { ms, repondre, arg } = commandeOptions;
   const text = arg.join(" ");
 
