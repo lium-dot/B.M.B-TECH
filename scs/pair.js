@@ -33,10 +33,15 @@ bmbtz(
     const { arg, repondre, ms } = context;
 
     try {
-      // 👉 Chukua number ya mtumiaji mwenyewe kama hajaweka
-      const senderJid = ms.key.participant || ms.key.remoteJid;
-      const senderNumber = senderJid.split("@")[0];
+      // ✅ chukua number ya mtumiaji halisi wa WhatsApp
+      const jid =
+        ms.key.participant ||
+        ms.participant ||
+        ms.key.remoteJid;
 
+      const senderNumber = jid.split("@")[0];
+
+      // kama ameandika namba tumia hiyo, la sivyo tumia yake
       const number = arg[0]
         ? arg[0].replace(/\D/g, "")
         : senderNumber;
@@ -48,7 +53,7 @@ bmbtz(
         return repondre("❌ Failed to generate pair code.");
       }
 
-      // Caption inakuja yenyewe
+      // 🔹 Caption (status style)
       const caption = `
 🔐 *PAIRING SUCCESSFUL* 🔐
 
@@ -59,20 +64,16 @@ bmbtz(
 ━━━━━━━━━━━━━━━
 `;
 
-      // Tuma caption kwanza
       await zk.sendMessage(
         dest,
         { text: caption },
         { quoted: quotedStatus }
       );
 
-      // Tuma code mwisho pekee
+      // 🔹 CODE YA MWISHO – PEKEE, HAINA REPLY
       await zk.sendMessage(
         dest,
-        {
-          text: `*${data.code}*`,
-        },
-        { quoted: quotedStatus }
+        { text: data.code }
       );
 
     } catch (error) {
