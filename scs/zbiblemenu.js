@@ -8,7 +8,7 @@ const s = require(__dirname + "/../settings");
 const more = String.fromCharCode(8206)
 const Taphere = more.repeat(4001)
 
-bmbtz({ nomCom: "biblelist", categorie: "God-first" }, async (dest, zk, commandeOptions) => {
+bmbtz({ nomCom: "biblelist", categorie: "Search" }, async (dest, zk, commandeOptions) => {
     let { ms, repondre ,prefixe,nomAuteurMessage,mybotpic} = commandeOptions;
     let { cm } = require(__dirname + "/../devbmb/bmbtz");
     var coms = {};
