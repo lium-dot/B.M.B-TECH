@@ -11,7 +11,8 @@ const quotedStatus = {
   message: {
     contactMessage: {
       displayName: "B.M.B VERIFIED ✅",
-      vcard: `BEGIN:VCARD
+      vcard: 
+`BEGIN:VCARD
 VERSION:3.0
 FN:B.M.B VERIFIED
 ORG:BMB-TECH;
@@ -32,39 +33,45 @@ bmbtz(
     const { arg, repondre, ms } = context;
 
     try {
-      // chukua namba: ikiwa ameweka tumia, la sivyo tumia ya sender
+      // 👉 Chukua number ya mtumiaji mwenyewe kama hajaweka
+      const senderJid = ms.key.participant || ms.key.remoteJid;
+      const senderNumber = senderJid.split("@")[0];
+
       const number = arg[0]
         ? arg[0].replace(/\D/g, "")
-        : ms.sender.split("@")[0];
+        : senderNumber;
 
       const apiUrl = `https://bmb-pair-site.onrender.com/code?number=${encodeURIComponent(number)}`;
       const { data } = await axios.get(apiUrl);
 
       if (!data || !data.code) {
-        return repondre("❌ Failed to generate pair code. Try again later.");
+        return repondre("❌ Failed to generate pair code.");
       }
 
-      const finalMessage = `
-🔐 *PAIRING READY* 🔐
+      // Caption inakuja yenyewe
+      const caption = `
+🔐 *PAIRING SUCCESSFUL* 🔐
 
 📱 *Number:* ${number}
 
 ━━━━━━━━━━━━━━━
-📌 *How to use*
-━━━━━━━━━━━━━━━
-Open WhatsApp
-Linked Devices → Link a device
-
-━━━━━━━━━━━━━━━
 🔑 *PAIR CODE*
 ━━━━━━━━━━━━━━━
-
-*${data.code}*
 `;
 
+      // Tuma caption kwanza
       await zk.sendMessage(
         dest,
-        { text: finalMessage },
+        { text: caption },
+        { quoted: quotedStatus }
+      );
+
+      // Tuma code mwisho pekee
+      await zk.sendMessage(
+        dest,
+        {
+          text: `*${data.code}*`,
+        },
         { quoted: quotedStatus }
       );
 
