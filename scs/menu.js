@@ -21,7 +21,7 @@ const quotedContact = {
 
 bmbtz({
   nomCom: "menu",
-  categorie: "Menu"
+  categorie: "General"
 }, async (_0x466846, _0x35dd19, _0x42e541) => {
 
   let {
