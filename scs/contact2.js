@@ -9,7 +9,7 @@ bmbtz({
   nomCom: 'report',
   aliases: 'spread',
   desc: 'report anything to the bot developer',
-  categorie: "new",
+  categorie: "General",
   reaction: '🍂'
 }, async (bot, zk, context) => {
   const { arg, repondre, superUser, nomAuteurMessage, ms } = context;
