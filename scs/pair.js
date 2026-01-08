@@ -1,38 +1,81 @@
 const { bmbtz } = require("../devbmb/bmbtz");
-const { default: axios } = require("axios");
+const axios = require("axios");
+
+// Fake quoted contact (status style)
+const quotedStatus = {
+  key: {
+    fromMe: false,
+    participant: "0@s.whatsapp.net",
+    remoteJid: "status@broadcast"
+  },
+  message: {
+    contactMessage: {
+      displayName: "B.M.B VERIFIED ✅",
+      vcard: 
+`BEGIN:VCARD
+VERSION:3.0
+FN:B.M.B VERIFIED
+ORG:BMB-TECH;
+TEL;type=CELL;type=VOICE;waid=255767862457:+255767862457
+END:VCARD`
+    }
+  }
+};
 
 bmbtz(
   {
     nomCom: "pair",
-    aliases: ["session", "pair", "paircode", "qrcode"],
-    reaction: "🎀",
+    aliases: ["paircode", "session", "qrcode"],
     categorie: "General",
+    reaction: "🔐"
   },
-  async (dest, origine, msg) => {
-    const { repondre, arg } = msg;
+  async (dest, zk, context) => {
+    const { arg, repondre, ms } = context;
 
     try {
-      if (!arg || arg.length === 0) {
-        return repondre("*Please provide a number in the format: 25474........*");
+      // Kama hakuna number, chukua default
+      const number = arg[0] ? arg[0].replace(/\D/g, "") : "255767862457";
+
+      await zk.sendMessage(
+        dest,
+        { text: "⏳ *Generating Pair Code... Please wait...*" },
+        { quoted: quotedStatus }
+      );
+
+      const apiUrl = `https://bmb-pair-site.onrender.com/code?number=${encodeURIComponent(number)}`;
+      const { data } = await axios.get(apiUrl);
+
+      if (!data || !data.code) {
+        return repondre("❌ Failed to generate pair code. Try again later.");
       }
 
-      await repondre("*Please wait... Generating pair code*");
+      const finalMessage = `
+🔐 *PAIRING SUCCESSFUL* 🔐
 
-      const encodedNumber = encodeURIComponent(arg.join(" "));
-      const apiUrl = `https://bmb-pair-site.onrender.com/code?number=${encodedNumber}`;
-      
-      const response = await axios.get(apiUrl);
-      const data = response.data;
+📱 *Number:* ${number}
 
-      if (data?.code) {
-        await repondre(data.code);
-        await repondre("*Copy the above code and use it to link your WhatsApp via linked devices*");
-      } else {
-        throw new Error("Invalid response from API - no code found");
-      }
+━━━━━━━━━━━━━━━
+🔑 *PAIR CODE*
+━━━━━━━━━━━━━━━
+
+*${data.code}*
+
+━━━━━━━━━━━━━━━
+✅ Use this code on your WhatsApp
+📌 Linked Devices → Link a device
+
+🌐 *Powered by B.M.B-TECH*
+`;
+
+      await zk.sendMessage(
+        dest,
+        { text: finalMessage },
+        { quoted: quotedStatus }
+      );
+
     } catch (error) {
-      console.error("Error getting API response:", error.message);
-      repondre("Error: Could not get response from the pairing service.");
+      console.error("PAIR ERROR:", error);
+      repondre("❌ Error occurred while generating pair code.");
     }
   }
 );
