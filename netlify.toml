@@ -1,0 +1,7 @@
+[build]
+  command = "npx expo export -p web"
+  publish = "dist"
+
+[build.environment]
+  # pin Node for Netlify build (optional)
+  NODE_VERSION = "18"
