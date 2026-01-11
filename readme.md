@@ -47,6 +47,6 @@
     <strong>4. DOWNLOAD BOT ZIP</strong>
     <br>
     <a href="https://github.com/Dev-bmbtech/BMB-TECH/archive/refs/heads/main.zip" target="_blank">
-        <img alt="Zip File" src="https://img.shields.io/badge/Download-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=darkorange&color=darkorange"/>
+        <img alt="Zip File" src="https://img.shields.io/badge/Zip-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=darkorange&color=darkorange"/>
     </a>
 </p>
