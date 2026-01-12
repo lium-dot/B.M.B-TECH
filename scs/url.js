@@ -1,119 +1,127 @@
-const { Sticker, createSticker, StickerTypes } = require('wa-sticker-formatter');
 const { bmbtz } = require("../devbmb/bmbtz");
-const { downloadMediaMessage } = require('@whiskeysockets/baileys');
-const fs = require("fs-extra");
-const ffmpeg = require("fluent-ffmpeg");
-const { Catbox } = require('node-catbox');
+const fancy = require("../devbmb/style");
 
-const catbox = new Catbox();
+const pkg = require("@whiskeysockets/baileys");
+const { generateWAMessageFromContent, proto } = pkg;
 
-// Quoted contact message
+// VCard Contact (status style)
 const quotedContact = {
   key: {
     fromMe: false,
-    participant: `0@s.whatsapp.net`,
+    participant: "0@s.whatsapp.net",
     remoteJid: "status@broadcast"
   },
   message: {
     contactMessage: {
-      displayName: "B.M.B TECH VERIFIED ✅",
-      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B TECH VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=255767862457:+255767862457\nEND:VCARD"
+      displayName: "B.M.B VERIFIED ✅",
+      vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:B.M.B VERIFIED
+ORG:BMB-TECH BOT;
+TEL;type=CELL;type=VOICE;waid=255767862457:+255767862457
+END:VCARD`
     }
   }
 };
 
-async function uploadToCatbox(Path) {
-    if (!fs.existsSync(Path)) {
-        throw new Error("File does not exist");
-    }
+// Function ya kujenga BOX
+function buildBox(text) {
+  const lines = text.split("\n");
+  const maxLength = Math.max(...lines.map(l => l.length));
 
-    try {
-        const response = await catbox.uploadFile({
-            path: Path
-        });
+  const top = "╔" + "═".repeat(maxLength + 2) + "╗";
+  const bottom = "╚" + "═".repeat(maxLength + 2) + "╝";
 
-        if (response) {
-            return response;
-        } else {
-            throw new Error("Error retrieving the file link");
-        }
-    } catch (err) {
-        throw new Error(String(err));
-    }
+  const middle = lines
+    .map(l => `║ ${l.padEnd(maxLength, " ")} ║`)
+    .join("\n");
+
+  return `${top}\n${middle}\n${bottom}`;
 }
 
-async function convertToMp3(inputPath, outputPath) {
-    return new Promise((resolve, reject) => {
-        ffmpeg(inputPath)
-            .toFormat("mp3")
-            .on("error", (err) => reject(err))
-            .on("end", () => resolve(outputPath))
-            .save(outputPath);
-    });
-}
+bmbtz(
+  {
+    nomCom: "fancy",
+    categorie: "Fun",
+    reaction: "✍️"
+  },
+  async (from, conn, context) => {
+    const { arg, repondre, prefixe } = context;
 
-bmbtz({ nomCom: "url", categorie: "General", reaction: "💗" }, async (origineMessage, zk, commandeOptions) => {
-    const { msgRepondu, repondre, ms } = commandeOptions;
-
-    if (!msgRepondu) {
-        repondre('Please reply to an image, video, or audio file.');
-        return;
-    }
-
-    let mediaPath, mediaType;
-
-    if (msgRepondu.videoMessage) {
-        const videoSize = msgRepondu.videoMessage.fileLength;
-
-        if (videoSize > 50 * 1024 * 1024) {
-            repondre('The video is too long. Please send a smaller video.');
-            return;
-        }
-
-        mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.videoMessage);
-        mediaType = 'video';
-    } else if (msgRepondu.imageMessage) {
-        mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.imageMessage);
-        mediaType = 'image';
-    } else if (msgRepondu.audioMessage) {
-        mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.audioMessage);
-        mediaType = 'audio';
-
-        const outputPath = `${mediaPath}.mp3`;
-
-        try {
-            await convertToMp3(mediaPath, outputPath);
-            fs.unlinkSync(mediaPath);
-            mediaPath = outputPath;
-        } catch (error) {
-            console.error("Error converting audio to MP3:", error);
-            repondre('Failed to process the audio file.');
-            return;
-        }
-    } else {
-        repondre('Unsupported media type. Reply with an image, video, or audio file.');
-        return;
-    }
+    const id = arg[0]?.match(/\d+/)?.join("");
+    const text = arg.slice(1).join(" ");
 
     try {
-        const catboxUrl = await uploadToCatbox(mediaPath);
-        fs.unlinkSync(mediaPath);
+      // Hakuna ID au text → onyesha list
+      if (!id || !text) {
+        return await conn.sendMessage(
+          from,
+          {
+            text:
+              `Example:\n${prefixe}fancy 10 bmb tech\n\n` +
+              fancy.list("B.M.B-TECH", fancy)
+          },
+          { quoted: quotedContact }
+        );
+      }
 
-        await zk.sendMessage(origineMessage, {
-            text: `bmb tech url: ${catboxUrl}`,
-            contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: "120363382023564830@newsletter",
-                    newsletterName: "𝙱.𝙼.𝙱-𝚇𝙼𝙳",
-                    serverMessageId: 1
-                }
-            }
-        }, { quoted: quotedContact });
+      const selectedStyle = fancy[parseInt(id) - 1];
+      if (!selectedStyle) {
+        return repondre("❌ Style not found.");
+      }
+
+      const styledText = fancy.apply(selectedStyle, text);
+
+      // 📦 BOX
+      const boxedText = buildBox(styledText);
+
+      // 🔘 COPY BUTTON (inakili text halisi bila box)
+      const buttons = [
+        {
+          name: "cta_copy",
+          buttonParamsJson: JSON.stringify({
+            display_text: "📋 COPY TEXT",
+            copy_code: styledText
+          })
+        }
+      ];
+
+      const viewOnceMessage = {
+        viewOnceMessage: {
+          message: {
+            messageContextInfo: {
+              deviceListMetadata: {},
+              deviceListMetadataVersion: 2
+            },
+            interactiveMessage: proto.Message.InteractiveMessage.create({
+              body: proto.Message.InteractiveMessage.Body.create({
+                text: boxedText
+              }),
+              footer: proto.Message.InteractiveMessage.Footer.create({
+                text: ""
+              }),
+              header: proto.Message.InteractiveMessage.Header.create({
+                title: "",
+                subtitle: "",
+                hasMediaAttachment: false
+              }),
+              nativeFlowMessage:
+                proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                  buttons
+                })
+            })
+          }
+        }
+      };
+
+      const waMsg = generateWAMessageFromContent(from, viewOnceMessage, {});
+      await conn.relayMessage(from, waMsg.message, {
+        messageId: waMsg.key.id
+      });
 
     } catch (error) {
-        console.error('Error while creating your URL:', error);
-        repondre('Oops, an error occurred.');
+      console.error("FANCY ERROR:", error);
+      await repondre("An error occurred while processing your request.");
     }
-});
+  }
+);
