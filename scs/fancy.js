@@ -78,7 +78,7 @@ bmbtz(
                 text: resultText
               }),
               footer: proto.Message.InteractiveMessage.Footer.create({
-                text: "B.M.B-TECH"
+                text: ""
               }),
               header: proto.Message.InteractiveMessage.Header.create({
                 title: "",
