@@ -1,10 +1,14 @@
+const { Sticker, createSticker, StickerTypes } = require('wa-sticker-formatter');
 const { bmbtz } = require("../devbmb/bmbtz");
-const fancy = require("../devbmb/style");
-
-const pkg = require("@whiskeysockets/baileys");
+const pkg = require('@whiskeysockets/baileys');
 const { generateWAMessageFromContent, proto } = pkg;
+const fs = require("fs-extra");
+const ffmpeg = require("fluent-ffmpeg");
+const { Catbox } = require('node-catbox');
 
-// VCard Contact (status style)
+const catbox = new Catbox();
+
+// Quoted contact
 const quotedContact = {
   key: {
     fromMe: false,
@@ -13,10 +17,10 @@ const quotedContact = {
   },
   message: {
     contactMessage: {
-      displayName: "B.M.B VERIFIED ✅",
+      displayName: "B.M.B TECH VERIFIED ✅",
       vcard: `BEGIN:VCARD
 VERSION:3.0
-FN:B.M.B VERIFIED
+FN:B.M.B TECH VERIFIED ✅
 ORG:BMB-TECH BOT;
 TEL;type=CELL;type=VOICE;waid=255767862457:+255767862457
 END:VCARD`
@@ -24,64 +28,64 @@ END:VCARD`
   }
 };
 
-// Function ya kujenga BOX
-function buildBox(text) {
-  const lines = text.split("\n");
-  const maxLength = Math.max(...lines.map(l => l.length));
+async function uploadToCatbox(path) {
+  if (!fs.existsSync(path)) throw new Error("File not found");
+  return await catbox.uploadFile({ path });
+}
 
-  const top = "╔" + "═".repeat(maxLength + 2) + "╗";
-  const bottom = "╚" + "═".repeat(maxLength + 2) + "╝";
-
-  const middle = lines
-    .map(l => `║ ${l.padEnd(maxLength, " ")} ║`)
-    .join("\n");
-
-  return `${top}\n${middle}\n${bottom}`;
+async function convertToMp3(input, output) {
+  return new Promise((resolve, reject) => {
+    ffmpeg(input)
+      .toFormat("mp3")
+      .on("end", () => resolve(output))
+      .on("error", reject)
+      .save(output);
+  });
 }
 
 bmbtz(
-  {
-    nomCom: "fancy",
-    categorie: "Fun",
-    reaction: "✍️"
-  },
-  async (from, conn, context) => {
-    const { arg, repondre, prefixe } = context;
+  { nomCom: "url", categorie: "General", reaction: "💗" },
+  async (from, zk, context) => {
+    const { msgRepondu, repondre } = context;
 
-    const id = arg[0]?.match(/\d+/)?.join("");
-    const text = arg.slice(1).join(" ");
+    if (!msgRepondu) {
+      return repondre("Please reply to an image, video, or audio.");
+    }
+
+    let mediaPath;
+
+    if (msgRepondu.videoMessage) {
+      if (msgRepondu.videoMessage.fileLength > 50 * 1024 * 1024) {
+        return repondre("Video is too large.");
+      }
+      mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.videoMessage);
+    } 
+    else if (msgRepondu.imageMessage) {
+      mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.imageMessage);
+    } 
+    else if (msgRepondu.audioMessage) {
+      const input = await zk.downloadAndSaveMediaMessage(msgRepondu.audioMessage);
+      const output = `${input}.mp3`;
+      await convertToMp3(input, output);
+      fs.unlinkSync(input);
+      mediaPath = output;
+    } 
+    else {
+      return repondre("Unsupported media type.");
+    }
 
     try {
-      // Hakuna ID au text → onyesha list
-      if (!id || !text) {
-        return await conn.sendMessage(
-          from,
-          {
-            text:
-              `Example:\n${prefixe}fancy 10 bmb tech\n\n` +
-              fancy.list("B.M.B-TECH", fancy)
-          },
-          { quoted: quotedContact }
-        );
-      }
+      const url = await uploadToCatbox(mediaPath);
+      fs.unlinkSync(mediaPath);
 
-      const selectedStyle = fancy[parseInt(id) - 1];
-      if (!selectedStyle) {
-        return repondre("❌ Style not found.");
-      }
+      const textResult = `B.M.B TECH URL\n\n${url}`;
 
-      const styledText = fancy.apply(selectedStyle, text);
-
-      // 📦 BOX
-      const boxedText = buildBox(styledText);
-
-      // 🔘 COPY BUTTON (inakili text halisi bila box)
       const buttons = [
         {
           name: "cta_copy",
           buttonParamsJson: JSON.stringify({
-            display_text: "📋 COPY TEXT",
-            copy_code: styledText
+            display_text: "📋 COPY URL",
+            copy_code: url
           })
         }
       ];
@@ -95,7 +99,7 @@ bmbtz(
             },
             interactiveMessage: proto.Message.InteractiveMessage.create({
               body: proto.Message.InteractiveMessage.Body.create({
-                text: boxedText
+                text: textResult
               }),
               footer: proto.Message.InteractiveMessage.Footer.create({
                 text: ""
@@ -115,13 +119,14 @@ bmbtz(
       };
 
       const waMsg = generateWAMessageFromContent(from, viewOnceMessage, {});
-      await conn.relayMessage(from, waMsg.message, {
+
+      await zk.relayMessage(from, waMsg.message, {
         messageId: waMsg.key.id
       });
 
-    } catch (error) {
-      console.error("FANCY ERROR:", error);
-      await repondre("An error occurred while processing your request.");
+    } catch (err) {
+      console.error("URL ERROR:", err);
+      repondre("Failed to generate URL.");
     }
   }
 );
