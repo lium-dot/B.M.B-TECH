@@ -101,20 +101,10 @@
       "value": "2",
       "required": false
     },
-    "ANTI_DELETE_MESSAGE": {
+    "ANTIDELETE": {
       "description": "if you want to enable anti delete message put yes else put no",
       "value": "no",
       "required": true
-    },
-    "AUTO_SAVE_CONTACTS": {
-      "description": "Enable automatic saving of contacts (yes = active, no = deactive)",
-      "value": "yes",
-      "required": false
-    },
-    "CHATBOT": {
-      "description": "Turn on the chatbot reply system (yes = active, no = deactive)",
-      "value": "yes",
-      "required": false
     },
     "AUTO_BIO": {
       "description": "Enable automatic bio update (yes = active, no = deactive)",
@@ -122,15 +112,15 @@
       "required": false
     }
   },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
   "buildpacks": [
     {
       "url": "heroku/nodejs"
-    },
-    {
-      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
-    },
-    {
-      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
     }
   ]
-  }
+}
