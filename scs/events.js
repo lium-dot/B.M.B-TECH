@@ -1,85 +1,47 @@
 const { bmbtz } = require('../devbmb/bmbtz');
 const { attribuerUnevaleur } = require('../lib/welcome');
 
-const newsletterContext = {
-  forwardingScore: 999,
-  isForwarded: true,
-  forwardedNewsletterMessageInfo: {
-    newsletterJid: "120363382023564830@newsletter",
-    newsletterName: "B.M.B TECH",
-    serverMessageId: 1
-  }
-};
-
 async function events(nomCom) {
 bmbtz({
-    nomCom: nomCom,
-    categorie: 'Group'
+nomCom: nomCom,
+categorie: 'Group'
 }, async (dest, zk, commandeOptions) => {
 
-    const { arg, superUser, verifAdmin } = commandeOptions;
+const { arg, repondre, superUser, verifAdmin } = commandeOptions;  
 
-    if (verifAdmin || superUser) {
+if (verifAdmin || superUser) {  
 
-        // Hakuna argument
-        if (!arg[0] || arg.join(' ') === ' ') {
-            return zk.sendMessage(dest, {
-                text:
-`╭───〔 ${nomCom.toUpperCase()} 〕───
-│
-│ ▶ ${nomCom} on
-│    Activate feature
-│
-│ ▶ ${nomCom} off
-│    Deactivate feature
-│
-╰──────────────`,
-                contextInfo: newsletterContext
-            });
-        }
+    // Hakuna argument  
+    if (!arg[0] || arg.join(' ') === ' ') {  
+        return repondre(
 
-        // on / off
-        if (arg[0] === 'on' || arg[0] === 'off') {
+╭───〔 ${nomCom.toUpperCase()} 〕───   │   │ ▶ ${nomCom} on   │    Activate feature   │   │ ▶ ${nomCom} off   │    Deactivate feature   │   ╰──────────────
+);
+}
 
-            await attribuerUnevaleur(dest, nomCom, arg[0]);
+// on / off  
+    if (arg[0] === 'on' || arg[0] === 'off') {  
 
-            return zk.sendMessage(dest, {
-                text:
-`╭───〔 SUCCESS 〕───
-│
-│ Feature : ${nomCom}
-│ Status  : ${arg[0].toUpperCase()}
-│
-╰──────────────`,
-                contextInfo: newsletterContext
-            });
-        }
+        await attribuerUnevaleur(dest, nomCom, arg[0]);  
 
-        // Argument mbaya
-        return zk.sendMessage(dest, {
-            text:
-`╭───〔 ERROR 〕───
-│
-│ Invalid option
-│ Use only:
-│ • on
-│ • off
-│
-╰──────────────`,
-            contextInfo: newsletterContext
-        });
+        return repondre(
 
-    } else {
-        return zk.sendMessage(dest, {
-            text:
-`╭───〔 ACCESS DENIED 〕───
-│
-│ Admin only command
-│
-╰──────────────`,
-            contextInfo: newsletterContext
-        });
-    }
+╭───〔 SUCCESS 〕───   │   │ Feature : ${nomCom}   │ Status  : ${arg[0].toUpperCase()}   │   ╰──────────────
+);
+}
+
+// Argument mbaya  
+    return repondre(
+
+╭───〔 ERROR 〕───   │   │ Invalid option   │ Use only:   │ • on   │ • off   │   ╰──────────────
+);
+
+} else {  
+    return repondre(
+
+╭───〔 ACCESS DENIED 〕───   │   │ Admin only command   │   ╰──────────────
+);
+}
 });
 }
 
