@@ -37,14 +37,14 @@ bmbtz({ nomCom: "repo", categorie: "General" }, async (dest, zk, commandeOptions
 ╭══════════════⊷❍
 ┃ *B.M.B TECH REPOSITORY*
 ┃══════════════════
+┃ ❏ Repo Link:🔗 *${repo.html_url})*
 ┃ ❏ Name: *${repo.name}*
 ┃ ❏ Owner: *${repo.owner.login}*
 ┃ ❏ Stars: ⭐ *${repo.stargazers_count}*
 ┃ ❏ Forks: 🍴 *${repo.forks_count}*
 ┃ ❏ Issues: 🛠️ *${repo.open_issues_count}*
 ┃ ❏ Watchers: 👀 *${repo.watchers_count}*
-┃ ❏ Last Updated: 📅 *${new Date(repo.updated_at).toLocaleString()}*
-┃ ❏ Repo Link: 🔗 [Click Here](${repo.html_url})
+┃ ❏ Updated: 📅 *${new Date(repo.updated_at).toLocaleString()}*
 ╰══════════════⊷❍
         `;
 
