@@ -37,7 +37,7 @@ bmbtz({ nomCom: "repo", categorie: "General" }, async (dest, zk, commandeOptions
 ╭══════════════⊷❍
 ┃ *B.M.B TECH REPOSITORY*
 ┃══════════════════
-┃ ❏ Repo Link:🔗 *${repo.html_url})*
+┃ ❏ Repo Link:🔗 *${repo.html_url}*
 ┃ ❏ Name: *${repo.name}*
 ┃ ❏ Owner: *${repo.owner.login}*
 ┃ ❏ Stars: ⭐ *${repo.stargazers_count}*
