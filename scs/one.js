@@ -17,7 +17,7 @@ const quotedContact = {
 };
 
 bmbtz(
-  { nomCom: "vv", aliases: ["send", "keep"], categorie: "View one" },
+  { nomCom: "vv", aliases: ["send", "keep"], categorie: "View One" },
   async (dest, zk, commandeOptions) => {
     const { repondre, msgRepondu } = commandeOptions;
 
