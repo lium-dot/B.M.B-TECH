@@ -1,5 +1,5 @@
 const { bmbtz } = require('../devbmb/bmbtz');
-const { attribuerUnevaleur } = require('../bdd/welcome');
+const { attribuerUnevaleur } = require('../lib/welcome');
 
 async function events(nomCom) {
 bmbtz({
