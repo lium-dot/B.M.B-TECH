@@ -1,47 +1,67 @@
 const { bmbtz } = require('../devbmb/bmbtz');
-const { attribuerUnevaleur } = require('../lib/welcome');
+const { attribuerUnevaleur } = require('../bdd/welcome');
 
 async function events(nomCom) {
 bmbtz({
-nomCom: nomCom,
-categorie: 'Group'
+    nomCom: nomCom,
+    categorie: 'Group'
 }, async (dest, zk, commandeOptions) => {
 
-const { arg, repondre, superUser, verifAdmin } = commandeOptions;  
+    const { arg, repondre, superUser, verifAdmin } = commandeOptions;
 
-if (verifAdmin || superUser) {  
+    if (verifAdmin || superUser) {
 
-    // Hakuna argument  
-    if (!arg[0] || arg.join(' ') === ' ') {  
+        // Hakuna argument
+        if (!arg[0] || arg.join(' ') === ' ') {
+            return repondre(
+`╭───〔 ${nomCom.toUpperCase()} 〕───
+│
+│ ▶ ${nomCom} on
+│    Activate feature
+│
+│ ▶ ${nomCom} off
+│    Deactivate feature
+│
+╰──────────────`
+            );
+        }
+
+        // on / off
+        if (arg[0] === 'on' || arg[0] === 'off') {
+
+            await attribuerUnevaleur(dest, nomCom, arg[0]);
+
+            return repondre(
+`╭───〔 SUCCESS 〕───
+│
+│ Feature : ${nomCom}
+│ Status  : ${arg[0].toUpperCase()}
+│
+╰──────────────`
+            );
+        }
+
+        // Argument mbaya
         return repondre(
+`╭───〔 ERROR 〕───
+│
+│ Invalid option
+│ Use only:
+│ • on
+│ • off
+│
+╰──────────────`
+        );
 
-╭───〔 ${nomCom.toUpperCase()} 〕───   │   │ ▶ ${nomCom} on   │    Activate feature   │   │ ▶ ${nomCom} off   │    Deactivate feature   │   ╰──────────────
-);
-}
-
-// on / off  
-    if (arg[0] === 'on' || arg[0] === 'off') {  
-
-        await attribuerUnevaleur(dest, nomCom, arg[0]);  
-
+    } else {
         return repondre(
-
-╭───〔 SUCCESS 〕───   │   │ Feature : ${nomCom}   │ Status  : ${arg[0].toUpperCase()}   │   ╰──────────────
-);
-}
-
-// Argument mbaya  
-    return repondre(
-
-╭───〔 ERROR 〕───   │   │ Invalid option   │ Use only:   │ • on   │ • off   │   ╰──────────────
-);
-
-} else {  
-    return repondre(
-
-╭───〔 ACCESS DENIED 〕───   │   │ Admin only command   │   ╰──────────────
-);
-}
+`╭───〔 ACCESS DENIED 〕───
+│
+│ Admin only command
+│
+╰──────────────`
+        );
+    }
 });
 }
 
