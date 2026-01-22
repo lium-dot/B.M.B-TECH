@@ -6,7 +6,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node index.js"
+    "start": "node --max-old-space-size=384 index.js"
   },
   "keywords": [
     "termux",
