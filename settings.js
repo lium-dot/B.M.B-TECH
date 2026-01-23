@@ -26,7 +26,7 @@ module.exports = {
     ANTICALL : process.env.ANTICALL || 'yes',   
     AUTO_BIO : process.env.AUTO_BIO || 'yes',               
     DP : process.env.STARTING_BOT_MESSAGE || "yes",
-    ANTIDELETE1 : process.env.ANTI_DELETE_MESSAGE || 'no',
+    ANTIDELETE : process.env.ANTI_DELETE_MESSAGE || 'no',
     AUTO_REACT : process.env.AUTO_REACT || 'no',
     AUTO_REACT_STATUS : process.env.AUTO_REACT_STATUS || 'yes',
     AUTO_READ : process.env.AUTO_READ || 'yes',
