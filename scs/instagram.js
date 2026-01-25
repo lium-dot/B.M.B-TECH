@@ -25,7 +25,7 @@ END:VCARD`
   }
 };
 
-// Newsletter context
+// Newsletter context (FOR VIDEO)
 const newsletterContext = {
   forwardingScore: 999,
   isForwarded: true,
@@ -55,11 +55,7 @@ bmbtz(
       return zk.sendMessage(
         dest,
         {
-          text: `╭──〔 📎 INSTAGRAM LINK MISSING 〕──
-│
-├─ Please provide a valid Instagram link.
-│
-╰──〔 📥 POWERED BY BMB TECH 〕──`,
+          text: "❌ Please provide a valid Instagram link.",
           contextInfo: newsletterContext
         },
         { quoted: quotedContact }
@@ -72,71 +68,71 @@ bmbtz(
     ];
 
     if (!instagramPatterns.some(r => r.test(text))) {
-      return zk.sendMessage(
-        dest,
-        {
-          text: `╭──〔 ❌ INVALID LINK 〕──
-│
-├─ This is not a valid Instagram URL.
-│
-╰──〔 📥 POWERED BY BMB TECH 〕──`,
-          contextInfo: newsletterContext
-        },
-        { quoted: quotedContact }
-      );
+      return repondre("❌ This is not a valid Instagram URL.");
     }
 
     await zk.sendMessage(dest, { react: { text: "🔄", key: ms.key } });
 
     try {
       const data = await igdl(text);
+      if (!data?.data?.length) return repondre("❌ No media found.");
 
-      if (!data?.data?.length) {
-        return repondre("❌ No media found on this link.");
-      }
+      // Separate images & videos
+      const images = [];
+      const videos = [];
 
-      for (const media of data.data.slice(0, 20)) {
+      for (const media of data.data) {
         const url = media.url;
         const isVideo =
           media.type === "video" ||
           /\.(mp4|mov|mkv|webm)$/i.test(url);
 
-        if (isVideo) {
-          await zk.sendMessage(
-            dest,
-            {
-              video: { url },
-              mimetype: "video/mp4",
-              caption: `╭──〔 🎬 INSTAGRAM VIDEO 〕──
+        if (isVideo) videos.push(url);
+        else images.push(url);
+      }
+
+      // 1️⃣ SEND CAPTION FIRST
+      await zk.sendMessage(
+        dest,
+        {
+          text: `╭──〔 📎 INSTAGRAM DOWNLOAD 〕──
 │
-├─ Status: ✅ Downloaded
+├─ Images: ${images.length}
+├─ Videos: ${videos.length}
 │
-╰──〔 📥 POWERED BY BMB TECH 〕──`,
-              contextInfo: newsletterContext
-            },
-            { quoted: quotedContact }
-          );
-        } else {
-          await zk.sendMessage(
-            dest,
-            {
-              image: { url },
-              caption: `╭──〔 🖼️ INSTAGRAM IMAGE 〕──
-│
-├─ Status: ✅ Downloaded
-│
-╰──〔 📥 POWERED BY BMB TECH 〕──`,
-              contextInfo: newsletterContext
-            },
-            { quoted: quotedContact }
-          );
-        }
+╰──〔 📥 POWERED BY BMB TECH 〕──`
+        },
+        { quoted: quotedContact }
+      );
+
+      // 2️⃣ SEND IMAGES
+      for (const img of images.slice(0, 10)) {
+        await zk.sendMessage(
+          dest,
+          { image: { url: img } },
+          { quoted: quotedContact }
+        );
+      }
+
+      // 3️⃣ SEND VIDEO LAST (WITH NEWSLETTER)
+      for (const vid of videos.slice(0, 5)) {
+        await zk.sendMessage(
+          dest,
+          {
+            video: { url: vid },
+            mimetype: "video/mp4",
+            caption: "🎬 Instagram Video",
+            contextInfo: newsletterContext
+          },
+          { quoted: quotedContact }
+        );
       }
 
       await zk.sendMessage(dest, { react: { text: "✅", key: ms.key } });
+
     } catch (err) {
       console.error(err);
-      repondre("⚠️ Error while processing Instagram link.");
+      repondre("⚠️ Error while downloading Instagram media.");
     }
   }
 );
