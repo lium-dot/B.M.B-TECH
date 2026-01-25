@@ -1,5 +1,5 @@
 const { bmbtz } = require("../devbmb/bmbtz");
-const { igdl } = require("ruhend-scraper");
+const axios = require("axios");
 const config = require("../settings");
 
 // Prevent duplicate processing
@@ -9,7 +9,7 @@ const processedMessages = new Set();
 const quotedContact = {
   key: {
     fromMe: false,
-    participant: `0@s.whatsapp.net`,
+    participant: "0@s.whatsapp.net",
     remoteJid: "status@broadcast"
   },
   message: {
@@ -25,7 +25,7 @@ END:VCARD`
   }
 };
 
-// Newsletter context (FOR VIDEO)
+// Newsletter context (VIDEO ONLY)
 const newsletterContext = {
   forwardingScore: 999,
   isForwarded: true,
@@ -49,46 +49,27 @@ bmbtz(
     processedMessages.add(ms.key.id);
     setTimeout(() => processedMessages.delete(ms.key.id), 5 * 60 * 1000);
 
-    const text = arg.join(" ");
-
-    if (!text) {
-      return zk.sendMessage(
-        dest,
-        {
-          text: "❌ Please provide a valid Instagram link.",
-          contextInfo: newsletterContext
-        },
-        { quoted: quotedContact }
-      );
-    }
-
-    const instagramPatterns = [
-      /https?:\/\/(?:www\.)?instagram\.com\//,
-      /https?:\/\/(?:www\.)?instagr\.am\//
-    ];
-
-    if (!instagramPatterns.some(r => r.test(text))) {
-      return repondre("❌ This is not a valid Instagram URL.");
-    }
+    const url = arg.join(" ");
+    if (!url) return repondre("❌ Please provide an Instagram link.");
 
     await zk.sendMessage(dest, { react: { text: "🔄", key: ms.key } });
 
     try {
-      const data = await igdl(text);
-      if (!data?.data?.length) return repondre("❌ No media found.");
+      // 🔥 DELIRIUS API
+      const api = `https://api.delirius.store/download/instagram?url=${encodeURIComponent(url)}`;
+      const { data } = await axios.get(api);
+
+      if (!data || !data.media || !data.media.length) {
+        return repondre("❌ Failed to fetch Instagram media.");
+      }
 
       // Separate images & videos
       const images = [];
       const videos = [];
 
-      for (const media of data.data) {
-        const url = media.url;
-        const isVideo =
-          media.type === "video" ||
-          /\.(mp4|mov|mkv|webm)$/i.test(url);
-
-        if (isVideo) videos.push(url);
-        else images.push(url);
+      for (const m of data.media) {
+        if (m.type === "video") videos.push(m.url);
+        if (m.type === "image") images.push(m.url);
       }
 
       // 1️⃣ SEND CAPTION FIRST
@@ -114,7 +95,7 @@ bmbtz(
         );
       }
 
-      // 3️⃣ SEND VIDEO LAST (WITH NEWSLETTER)
+      // 3️⃣ SEND VIDEOS LAST (REAL VIDEO ✅)
       for (const vid of videos.slice(0, 5)) {
         await zk.sendMessage(
           dest,
@@ -131,8 +112,8 @@ bmbtz(
       await zk.sendMessage(dest, { react: { text: "✅", key: ms.key } });
 
     } catch (err) {
-      console.error(err);
-      repondre("⚠️ Error while downloading Instagram media.");
+      console.error(err?.response?.data || err);
+      repondre("⚠️ Error while downloading Instagram video.");
     }
   }
 );
