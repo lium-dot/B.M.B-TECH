@@ -3,9 +3,11 @@ const pkg = require("@whiskeysockets/baileys");
 const { generateWAMessageFromContent, proto } = pkg;
 const fs = require("fs-extra");
 const axios = require("axios");
+const FormData = require("form-data");
 
-/* ===== IMGDB CONFIG ===== */
+/* ===== IMGBB CONFIG ===== */
 const IMGBB_API_KEY = "84b96ae2b8e45c7e957e1258e0e9e7c0";
+const IMGBB_API_URL = "https://api.imgbb.com/1/upload";
 
 /* ===== QUOTED CONTACT ===== */
 const quotedContact = {
@@ -28,75 +30,114 @@ END:VCARD`
 };
 
 /* ===== UPLOAD TO IMGBB ===== */
-async function uploadToImgBB(filePath) {
-  const imageBase64 = fs.readFileSync(filePath, "base64");
+async function uploadToImgbb(filePath) {
+  if (!fs.existsSync(filePath)) throw new Error("File not found");
+
+  const form = new FormData();
+  form.append("image", fs.createReadStream(filePath));
 
   const res = await axios.post(
-    "https://api.imgbb.com/1/upload",
-    new URLSearchParams({
-      key: IMGBB_API_KEY,
-      image: imageBase64
-    }).toString(),
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      }
-    }
+    `${IMGBB_API_URL}?key=${IMGBB_API_KEY}`,
+    form,
+    { headers: form.getHeaders() }
   );
 
   return res.data.data.url;
 }
 
+/* ===== COMMAND ===== */
 bmbtz(
-  { nomCom: "url2", categorie: "General", reaction: "🔗" },
+  {
+    nomCom: "url",
+    categorie: "General",
+    reaction: "💗"
+  },
   async (from, zk, context) => {
-    const { ms, repondre } = context;
+    const { msgRepondu, ms, repondre } = context;
 
-    // ===== PATA MESSAGE KAMILI =====
-    const message =
-      ms.message?.imageMessage
-        ? ms
-        : ms.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage
-        ? {
-            message: {
-              imageMessage:
-                ms.message.extendedTextMessage.contextInfo.quotedMessage.imageMessage
-            }
-          }
-        : null;
+    /* ===== IMAGE CHECK ===== */
+    const imageMessage =
+      msgRepondu?.imageMessage || ms.message?.imageMessage;
 
-    if (!message) {
-      return repondre("❌ Reply or send an IMAGE with this command.");
+    if (!imageMessage) {
+      return repondre("❌ Reply picha kisha andika *.url*");
     }
 
+    let imagePath;
+
     try {
-      // ===== DOWNLOAD IMAGE (SAHIHI) =====
-      const mediaPath = await zk.downloadAndSaveMediaMessage(message, "imgbb");
+      /* ===== DOWNLOAD IMAGE ===== */
+      imagePath = await zk.downloadAndSaveMediaMessage(imageMessage);
 
-      // ===== UPLOAD =====
-      const url = await uploadToImgBB(mediaPath);
-      fs.unlinkSync(mediaPath);
+      /* ===== UPLOAD ===== */
+      const imageUrl = await uploadToImgbb(imagePath);
+      fs.unlinkSync(imagePath);
 
-      // ===== RESPONSE =====
+      /* ===== RESULT UI ===== */
       const textResult = `
 ╭───〔 B.M.B TECH IMAGE URL 〕───
 │
-│ 🖼️ Uploaded Successfully
+│ 🔗 Generated Link:
 │
-│ 🔗 ${url}
+│ ${imageUrl}
 │
-╰─────────────────────
+│ 📋 Use COPY button
+│
+╰────────────────────────
 `;
 
-      await zk.sendMessage(
+      const buttons = [
+        {
+          name: "cta_copy",
+          buttonParamsJson: JSON.stringify({
+            display_text: "📋 COPY URL",
+            copy_code: imageUrl
+          })
+        }
+      ];
+
+      const viewOnceMessage = {
+        viewOnceMessage: {
+          message: {
+            messageContextInfo: {
+              deviceListMetadata: {},
+              deviceListMetadataVersion: 2
+            },
+            interactiveMessage:
+              proto.Message.InteractiveMessage.create({
+                body: proto.Message.InteractiveMessage.Body.create({
+                  text: textResult
+                }),
+                footer: proto.Message.InteractiveMessage.Footer.create({
+                  text: ""
+                }),
+                header: proto.Message.InteractiveMessage.Header.create({
+                  title: "",
+                  subtitle: "",
+                  hasMediaAttachment: false
+                }),
+                nativeFlowMessage:
+                  proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                    buttons
+                  })
+              })
+          }
+        }
+      };
+
+      const waMsg = generateWAMessageFromContent(
         from,
-        { text: textResult },
-        { quoted: quotedContact }
+        viewOnceMessage,
+        {}
       );
 
+      await zk.relayMessage(from, waMsg.message, {
+        messageId: waMsg.key.id
+      });
+
     } catch (err) {
-      console.error("IMGBB ERROR:", err);
-      repondre("❌ ImgBB upload failed.");
+      console.error("IMGBB URL ERROR:", err);
+      repondre("❌ Failed to generate image URL.");
     }
   }
 );
