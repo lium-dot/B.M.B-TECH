@@ -13,7 +13,7 @@ const sleep =  (ms) =>{
   } ;
 
 
-bmbtz({ nomCom: "vv2", categorie: "View One" }, async (dest, zk, commandeOptions) => {
+bmbtz({ nomCom: "vv2", categorie: "View Once" }, async (dest, zk, commandeOptions) => {
 
   const { repondre , msgRepondu , superUser, auteurMessage } = commandeOptions;
   
