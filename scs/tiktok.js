@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { bmbtz } = require("../devbmb/bmbtz");
 
-/* ===== VCard Contact ===== */
+/* ===== VCard ===== */
 const quotedContact = {
   key: {
     fromMe: false,
@@ -21,7 +21,7 @@ END:VCARD`
   }
 };
 
-/* ===== Newsletter Context ===== */
+/* ===== Newsletter ===== */
 const newsletterContext = {
   contextInfo: {
     forwardingScore: 999,
@@ -35,9 +35,8 @@ const newsletterContext = {
 };
 
 /* ===== API ===== */
-const TIKTOK_API = "https://bmb-tiktok.vercel.app/api/video?url=";
+const API = "https://bmb-tiktok.vercel.app/api/video?url=";
 
-/* ===== COMMAND ===== */
 bmbtz(
   {
     nomCom: "tiktok",
@@ -45,66 +44,66 @@ bmbtz(
     reaction: "🎵",
     alias: ["tt", "ttdl", "tiktokdl"]
   },
-  async (dest, zk, commandeOptions) => {
-    const { arg, repondre, ms } = commandeOptions;
+  async (dest, zk, { arg, repondre, ms }) => {
 
-    if (!arg[0]) return repondre("❌ Please provide a TikTok video link.");
-
-    const q = arg.join(" ");
-    if (!q.includes("tiktok.com")) {
-      return repondre("❌ Invalid TikTok link.");
-    }
+    if (!arg[0]) return repondre("❌ Tuma TikTok link.");
+    const link = arg.join(" ");
+    if (!link.includes("tiktok.com")) return repondre("❌ Invalid TikTok link.");
 
     try {
-      await zk.sendMessage(dest, {
-        react: { text: "⏳", key: ms.key }
-      });
+      await zk.sendMessage(dest, { react: { text: "⏳", key: ms.key } });
 
-      /* ===== FETCH API ===== */
-      const { data } = await axios.get(
-        `${TIKTOK_API}${encodeURIComponent(q)}`
-      );
+      const res = await axios.get(API + encodeURIComponent(link));
+      const data = res.data;
 
-      if (!data || !data.video) {
-        return repondre("⚠️ Failed to fetch TikTok video.");
+      /* ===== FLEXIBLE VIDEO PICK ===== */
+      const videoUrl =
+        data.video ||
+        data.url ||
+        data.videoUrl ||
+        data?.result?.video ||
+        data?.data?.video;
+
+      if (!videoUrl) {
+        console.log("API RESPONSE:", data);
+        return repondre("⚠️ API haijarudisha video URL.");
       }
 
-      const videoUrl = data.video;
-      const title = data.title || "TikTok Video";
-      const author = data.author || "Unknown";
+      const title =
+        data.title ||
+        data?.result?.title ||
+        "TikTok Video";
 
-      /* ===== CAPTION ===== */
+      const author =
+        data.author ||
+        data?.result?.author ||
+        "Unknown";
+
       const caption =
         "╔══════════════════❒\n" +
         "║ 🎵 *TikTok Video*\n" +
         "║\n" +
-        `║ 👤 *Author:* ${author}\n` +
-        `║ 📖 *Title:* ${title}\n` +
+        `║ 👤 Author: ${author}\n` +
+        `║ 📖 Title: ${title}\n` +
         "╚══════════════════❒";
 
       /* ===== SEND TEXT ===== */
       await zk.sendMessage(
         dest,
-        {
-          text: caption,
-          ...newsletterContext
-        },
+        { text: caption, ...newsletterContext },
         { quoted: quotedContact }
       );
 
       /* ===== SEND VIDEO ===== */
       await zk.sendMessage(
         dest,
-        {
-          video: { url: videoUrl },
-          ...newsletterContext
-        },
+        { video: { url: videoUrl }, ...newsletterContext },
         { quoted: quotedContact }
       );
 
-    } catch (error) {
-      console.error("TikTok API ERROR:", error);
-      repondre("❌ An error occurred while downloading the TikTok video.");
+    } catch (e) {
+      console.error("TIKTOK ERROR:", e.response?.data || e);
+      repondre("❌ TikTok download failed (API error).");
     }
   }
 );
