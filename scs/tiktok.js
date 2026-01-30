@@ -1,22 +1,27 @@
 const axios = require("axios");
 const { bmbtz } = require("../devbmb/bmbtz");
 
-// VCard Contact (optional)
+/* ===== VCard Contact ===== */
 const quotedContact = {
   key: {
     fromMe: false,
-    participant: `0@s.whatsapp.net`,
+    participant: "0@s.whatsapp.net",
     remoteJid: "status@broadcast"
   },
   message: {
     contactMessage: {
       displayName: "B.M.B VERIFIED ✅",
-      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:B.M.B VERIFIED ✅\nORG:BMB-TECH BOT;\nTEL;type=CELL;type=VOICE;waid=255767862457:+255767862457\nEND:VCARD"
+      vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:B.M.B VERIFIED ✅
+ORG:BMB-TECH BOT;
+TEL;type=CELL;type=VOICE;waid=255767862457:+255767862457
+END:VCARD`
     }
   }
 };
 
-// Newsletter context
+/* ===== Newsletter Context ===== */
 const newsletterContext = {
   contextInfo: {
     forwardingScore: 999,
@@ -29,55 +34,77 @@ const newsletterContext = {
   }
 };
 
-bmbtz({
-  nomCom: "tiktok",
-  categorie: "Download",
-  reaction: "🎵",
-  alias: ["ttdl", "tt", "tiktokdl"]
-}, async (dest, zk, commandeOptions) => {
-  const { arg, repondre, ms } = commandeOptions;
+/* ===== API ===== */
+const TIKTOK_API = "https://bmb-tiktok.vercel.app/api/video?url=";
 
-  if (!arg[0]) return repondre("❌ Please provide a TikTok video link.");
-  const q = arg.join(" ");
-  if (!q.includes("tiktok.com")) return repondre("❌ Invalid TikTok link.");
+/* ===== COMMAND ===== */
+bmbtz(
+  {
+    nomCom: "tiktok",
+    categorie: "Download",
+    reaction: "🎵",
+    alias: ["tt", "ttdl", "tiktokdl"]
+  },
+  async (dest, zk, commandeOptions) => {
+    const { arg, repondre, ms } = commandeOptions;
 
-  try {
-    await zk.sendMessage(dest, { react: { text: "⏳", key: ms.key } });
+    if (!arg[0]) return repondre("❌ Please provide a TikTok video link.");
 
-    const apiUrl = `https://bmb-tiktok.vercel.app/api/video?url=${encodeURIComponent(q)}`;
-    const { data } = await axios.get(apiUrl);
+    const q = arg.join(" ");
+    if (!q.includes("tiktok.com")) {
+      return repondre("❌ Invalid TikTok link.");
+    }
 
-    if (!data.status || !data.data) return repondre("⚠️ Failed to fetch TikTok video.");
+    try {
+      await zk.sendMessage(dest, {
+        react: { text: "⏳", key: ms.key }
+      });
 
-    const { title, like, comment, share, author, meta } = data.data;
-    const videoMedia = meta?.media?.find(v => v.type === "video");
-    if (!videoMedia) return repondre("⚠️ Video not found in response.");
+      /* ===== FETCH API ===== */
+      const { data } = await axios.get(
+        `${TIKTOK_API}${encodeURIComponent(q)}`
+      );
 
-    const caption =
-      "╔══════════════════❒\n" +
-      `║ 🎵 *TikTok Video*\n` +
-      `║\n` +
-      `║ 👤 *User:* ${author.nickname} (@${author.username})\n` +
-      `║ 📖 *Title:* ${title}\n` +
-      `║ 👍 *Likes:* ${like}\n` +
-      `║ 💬 *Comments:* ${comment}\n` +
-      `║ 🔁 *Shares:* ${share}\n` +
-      "╚══════════════════❒";
+      if (!data || !data.video) {
+        return repondre("⚠️ Failed to fetch TikTok video.");
+      }
 
-    // 1. Send caption only (no image or video)
-    await zk.sendMessage(dest, {
-      text: caption,
-      ...newsletterContext
-    }, { quoted: quotedContact });
+      const videoUrl = data.video;
+      const title = data.title || "TikTok Video";
+      const author = data.author || "Unknown";
 
-    // 2. Send video only (no caption)
-    await zk.sendMessage(dest, {
-      video: { url: videoMedia.org },
-      ...newsletterContext
-    }, { quoted: quotedContact });
+      /* ===== CAPTION ===== */
+      const caption =
+        "╔══════════════════❒\n" +
+        "║ 🎵 *TikTok Video*\n" +
+        "║\n" +
+        `║ 👤 *Author:* ${author}\n` +
+        `║ 📖 *Title:* ${title}\n` +
+        "╚══════════════════❒";
 
-  } catch (error) {
-    console.error("TikTok Error:", error);
-    repondre("❌ An error occurred while downloading the TikTok video.");
+      /* ===== SEND TEXT ===== */
+      await zk.sendMessage(
+        dest,
+        {
+          text: caption,
+          ...newsletterContext
+        },
+        { quoted: quotedContact }
+      );
+
+      /* ===== SEND VIDEO ===== */
+      await zk.sendMessage(
+        dest,
+        {
+          video: { url: videoUrl },
+          ...newsletterContext
+        },
+        { quoted: quotedContact }
+      );
+
+    } catch (error) {
+      console.error("TikTok API ERROR:", error);
+      repondre("❌ An error occurred while downloading the TikTok video.");
+    }
   }
-});
+);
