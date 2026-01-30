@@ -146,6 +146,7 @@
     "xfarr-api": "^1.0.3",
     "yargs": "^17.3.1",
     "youtube-yts": "^2.0.0",
+    "@xaviabot/tiktok-downloader": "^1.0.0",
     "yt-search": "^2.10.4",
     "youtubedl-core": "^4.11.7"
   }
