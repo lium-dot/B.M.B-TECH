@@ -5,7 +5,7 @@ const fs = require("fs-extra");
 const axios = require("axios");
 
 /* ===== IMGDB CONFIG ===== */
-const IMGBB_API_KEY = "WEKA_API_KEY_YAKO_HAPA";
+const IMGBB_API_KEY = "84b96ae2b8e45c7e957e1258e0e9e7c0";
 
 /* ===== QUOTED CONTACT ===== */
 const quotedContact = {
@@ -48,7 +48,7 @@ async function uploadToImgBB(filePath) {
 }
 
 bmbtz(
-  { nomCom: "url", categorie: "General", reaction: "💗" },
+  { nomCom: "url2", categorie: "General", reaction: "🔗" },
   async (from, zk, context) => {
     const { msgRepondu, ms, repondre } = context;
 
