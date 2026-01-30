@@ -48,7 +48,7 @@ async function uploadToImgbb(filePath) {
 /* ===== COMMAND ===== */
 bmbtz(
   {
-    nomCom: "url",
+    nomCom: "url2",
     categorie: "General",
     reaction: "💗"
   },
