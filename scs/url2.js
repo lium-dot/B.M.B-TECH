@@ -29,17 +29,17 @@ END:VCARD`
 
 /* ===== UPLOAD TO IMGBB ===== */
 async function uploadToImgBB(filePath) {
-  if (!fs.existsSync(filePath)) throw new Error("File not found");
-
-  const base64Image = fs.readFileSync(filePath, "base64");
+  const imageBase64 = fs.readFileSync(filePath, "base64");
 
   const res = await axios.post(
     "https://api.imgbb.com/1/upload",
-    null,
+    new URLSearchParams({
+      key: IMGBB_API_KEY,
+      image: imageBase64
+    }).toString(),
     {
-      params: {
-        key: IMGBB_API_KEY,
-        image: base64Image
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
       }
     }
   );
@@ -50,83 +50,53 @@ async function uploadToImgBB(filePath) {
 bmbtz(
   { nomCom: "url2", categorie: "General", reaction: "🔗" },
   async (from, zk, context) => {
-    const { msgRepondu, ms, repondre } = context;
+    const { ms, repondre } = context;
 
-    const imageMsg =
-      msgRepondu?.imageMessage || ms.message?.imageMessage;
+    // ===== PATA MESSAGE KAMILI =====
+    const message =
+      ms.message?.imageMessage
+        ? ms
+        : ms.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage
+        ? {
+            message: {
+              imageMessage:
+                ms.message.extendedTextMessage.contextInfo.quotedMessage.imageMessage
+            }
+          }
+        : null;
 
-    if (!imageMsg) {
-      return repondre(
-        "❌ ImgBB supports IMAGES ONLY.\n\nReply/send an IMAGE with `.url`"
-      );
+    if (!message) {
+      return repondre("❌ Reply or send an IMAGE with this command.");
     }
 
-    let mediaPath;
-
     try {
-      /* ===== DOWNLOAD IMAGE ===== */
-      mediaPath = await zk.downloadAndSaveMediaMessage(imageMsg);
+      // ===== DOWNLOAD IMAGE (SAHIHI) =====
+      const mediaPath = await zk.downloadAndSaveMediaMessage(message, "imgbb");
 
-      /* ===== UPLOAD IMAGE ===== */
+      // ===== UPLOAD =====
       const url = await uploadToImgBB(mediaPath);
       fs.unlinkSync(mediaPath);
 
-      /* ===== UI RESULT ===== */
+      // ===== RESPONSE =====
       const textResult = `
 ╭───〔 B.M.B TECH IMAGE URL 〕───
 │
-│ 🖼️ Image Uploaded Successfully
+│ 🖼️ Uploaded Successfully
 │
-│ 🔗 Link:
-│ ${url}
+│ 🔗 ${url}
 │
 ╰─────────────────────
 `;
 
-      const buttons = [
-        {
-          name: "cta_copy",
-          buttonParamsJson: JSON.stringify({
-            display_text: "📋 COPY URL",
-            copy_code: url
-          })
-        }
-      ];
-
-      const viewOnceMessage = {
-        viewOnceMessage: {
-          message: {
-            messageContextInfo: {
-              deviceListMetadata: {},
-              deviceListMetadataVersion: 2
-            },
-            interactiveMessage: proto.Message.InteractiveMessage.create({
-              body: proto.Message.InteractiveMessage.Body.create({
-                text: textResult
-              }),
-              footer: proto.Message.InteractiveMessage.Footer.create({
-                text: ""
-              }),
-              header: proto.Message.InteractiveMessage.Header.create({
-                hasMediaAttachment: false
-              }),
-              nativeFlowMessage:
-                proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                  buttons
-                })
-            })
-          }
-        }
-      };
-
-      const waMsg = generateWAMessageFromContent(from, viewOnceMessage, {});
-      await zk.relayMessage(from, waMsg.message, {
-        messageId: waMsg.key.id
-      });
+      await zk.sendMessage(
+        from,
+        { text: textResult },
+        { quoted: quotedContact }
+      );
 
     } catch (err) {
       console.error("IMGBB ERROR:", err);
-      repondre("❌ Failed to upload image to ImgBB.");
+      repondre("❌ ImgBB upload failed.");
     }
   }
 );
