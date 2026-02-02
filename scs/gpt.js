@@ -90,10 +90,15 @@ Example:
     }
 
     /* ===== GPT API ===== */
-    const apiUrl =
-      `https://api.giftedtech.co.ke/api/ai/ai?apikey=gifted&q=${encodeURIComponent(q)}`;
+    const url = `https://api.giftedtech.web.id/api/ai/gpt4?apikey=gifted&q=${encodeURIComponent(query)}`;
+      console.log("API URL:", url);
+      const response = await axios.get(url); // Use axios instead of fetch
+      console.log("API Response Status:", response.status);
 
-    const { data } = await axios.get(apiUrl);
+      if (response.status !== 200) {
+        const errorText = response.data.error || "Unknown error";
+        throw new Error(`API request failed: ${response.status} - ${errorText}`);
+      }
 
     if (!data || !data.message) {
       return conn.sendMessage(
