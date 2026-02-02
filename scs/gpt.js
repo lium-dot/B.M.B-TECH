@@ -91,7 +91,7 @@ Example:
 
     /* ===== GPT API ===== */
     const apiUrl =
-      `https://lance-frank-asta.onrender.com/api/gpt?q=${encodeURIComponent(q)}`;
+      `https://api.giftedtech.co.ke/api/ai/ai?apikey=gifted&q=${encodeURIComponent(q)}`;
 
     const { data } = await axios.get(apiUrl);
 
