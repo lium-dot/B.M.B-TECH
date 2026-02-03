@@ -205,85 +205,83 @@ bmbtz({ nomCom: "demote", categorie: 'Group', reaction: "👨🏿‍💼" }, asy
 
 /** ***fin démettre****  **/
 /** **retirer** */
-bmbtz({ nomCom: "remove", categorie: 'Group', reaction: "👨🏿‍💼" }, async (dest, zk, commandeOptions) => {
-  let {
-    repondre,
-    msgRepondu,
-    infosGroupe,
-    auteurMsgRepondu,
-    verifGroupe,
-    nomAuteurMessage,
-    auteurMessage,
-    superUser,
-    idBot
-  } = commandeOptions;
+bmbtz({ nomCom: "remove", categorie: 'Group', reaction: "🦵" }, async (dest, zk, commandeOptions) => {
+  let { repondre, msgRepondu, infosGroupe, auteurMsgRepondu, verifGroupe, nomAuteurMessage, auteurMessage, superUser, idBot } = commandeOptions;
+  let membresGroupe = verifGroupe ? await infosGroupe.participants : ""
+  if (!verifGroupe) { return repondre("for groups only"); }
 
-  let membresGroupe = verifGroupe ? await infosGroupe.participants : [];
 
-  if (!verifGroupe) return repondre("🚫 *This command works in groups only.*");
+  const verifMember = (user) => {
 
-  const verifMember = (user) => membresGroupe.some(m => m.id === user);
-  const memberAdmin = (membresGroupe) => membresGroupe.filter(m => m.admin).map(m => m.id);
+    for (const m of membresGroupe) {
+      if (m.id !== user) {
+        continue;
+      }
+      else { return true }
+      //membre=//(m.id==auteurMsgRepondu? return true) :false;
+    }
+  }
 
-  const admins = memberAdmin(membresGroupe);
-  const isTargetAdmin = admins.includes(auteurMsgRepondu);
-  const isTargetMember = verifMember(auteurMsgRepondu);
-  const isSenderAdmin = admins.includes(auteurMessage);
-  const isBotAdmin = admins.includes(idBot);
+  const memberAdmin = (membresGroupe) => {
+    let admin = [];
+    for (m of membresGroupe) {
+      if (m.admin == null) continue;
+      admin.push(m.id);
 
+    }
+    // else{admin= false;}
+    return admin;
+  }
+
+  const a = verifGroupe ? memberAdmin(membresGroupe) : '';
+
+
+  let admin = verifGroupe ? a.includes(auteurMsgRepondu) : false;
+  let membre = verifMember(auteurMsgRepondu)
+  let autAdmin = verifGroupe ? a.includes(auteurMessage) : false;
+  zkad = verifGroupe ? a.includes(idBot) : false;
   try {
-    if (isSenderAdmin || superUser) {
-      if (msgRepondu) {
-        if (isBotAdmin) {
-          if (isTargetMember) {
-            if (!isTargetAdmin) {
-              const gifLink = "https://github.com/novaxmd/BMB-XMD-DATA/raw/refs/heads/main/remover.gif";
+    // repondre(verifZokouAdmin)
 
-              const sticker = new Sticker(gifLink, {
-                pack: 'Bmb-Tech',
-                author: nomAuteurMessage,
-                type: StickerTypes.FULL,
-                categories: ['🚫', '📤'],
-                id: 'remove001',
-                quality: 50,
+    if (autAdmin || superUser) {
+      if (msgRepondu) {
+        if (zkad) {
+          if (membre) {
+            if (admin == false) {
+              const gifLink = "https://github.com/novaxmd/BMB-XMD-DATA/raw/refs/heads/main/remover.gif"
+              var sticker = new Sticker(gifLink, {
+                pack: 'BMB-TECH', // The pack name
+                author: nomAuteurMessage, // The author name
+                type: StickerTypes.FULL, // The sticker type
+                categories: ['🤩', '🎉'], // The sticker category
+                id: '12345', // The sticker id
+                quality: 50, // The quality of the output file
                 background: '#000000'
               });
 
-              await sticker.toFile("st.webp");
-
-              let txt = 
-`╭──❰ *REMOVAL NOTICE* ❱──╮
+              await sticker.toFile("st.webp")
+              var txt = `
+╭───〔 🦵 MEMBER REMOVED 〕───
 │
-│ ❌ @${auteurMsgRepondu.split("@")[0]} has been *removed*
-│ 📤 By: *${nomAuteurMessage}*
-│ 🛡️ Reason: Not specified
+│ 👤 User: @${auteurMsgRepondu.split("@")[0]}
 │
-╰──────────────────────╯`;
-
+│ ✅ Removed from group successfully
+│
+╰────────────────────`
+            /*  zk.sendMessage(dest, { sticker: fs.readFileSync("st.webp") }, { quoted: ms.message.extendedTextMessage.contextInfo.stanzaId})*/
               await zk.groupParticipantsUpdate(dest, [auteurMsgRepondu], "remove");
-              zk.sendMessage(dest, {
-                text: txt,
-                mentions: [auteurMsgRepondu]
-              });
+              zk.sendMessage(dest, { text: txt, mentions: [auteurMsgRepondu] })
 
-            } else {
-              repondre("⚠️ This member is a group admin and cannot be removed.");
-            }
-          } else {
-            repondre("⚠️ This user is *not a member* of this group.");
-          }
-        } else {
-          repondre("🛑 I cannot remove users because I'm *not an admin* in this group.");
+            } else { repondre("This member cannot be removed because he is an administrator of the group.") }
+
+          } else { return repondre("This user is not part of the group."); }
         }
-      } else {
-        repondre("👉 Please *tag the member* you want to remove.");
-      }
-    } else {
-      repondre("🚫 *You must be an admin* to use this command.");
-    }
-  } catch (e) {
-    repondre("❗ *Error occurred:* " + e);
-  }
+        else { return repondre("Sorry, I cannot perform this action because I am not an administrator of the group.") }
+
+      } else { repondre("please tag the member to be removed"); }
+    } else { return repondre("Sorry I cannot perform this action because you are not an administrator of the group .") }
+  } catch (e) { repondre("oups " + e) }
+
 });
 
 
