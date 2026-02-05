@@ -1,135 +1,147 @@
-const { bmbtz } = require('../devbmb/bmbtz');
-const axios = require('axios');
+const axios = require("axios");
+const { bmbtz } = require("../devbmb/bmbtz");
 
-/* ===== VERIFIED CONTACT ===== */
-const verifiedContact = {
-  key: {
-    fromMe: false,
-    participant: "0@s.whatsapp.net",
-    remoteJid: "status@broadcast"
-  },
-  message: {
-    contactMessage: {
-      displayName: "B.M.B VERIFIED ✅",
-      vcard: `BEGIN:VCARD
-VERSION:3.0
-FN:B.M.B VERIFIED
-ORG:B.M.B TECH;
-TEL;type=CELL;type=VOICE;waid=255767862457:+255767862457
-END:VCARD`
-    }
-  }
-};
+/* ===== API CONFIG ===== */
+const API_URL = "https://iamtkm.vercel.app/ai/gpt5";
+const API_KEY = "tkm";
 
-/* ===== NEWSLETTER CONTEXT ===== */
-const newsletterContext = {
-  forwardingScore: 999,
-  isForwarded: true,
-  forwardedNewsletterMessageInfo: {
-    newsletterJid: "120363382023564830@newsletter",
-    newsletterName: "B.M.B TECH",
-    serverMessageId: 1
-  }
-};
-
+/* ===== COMMAND ===== */
 bmbtz(
-{
-  nomCom: "gpt",
-  alias: ["bot", "developer", "ai", "bmbai", "bing"],
-  categorie: "AI",
-  reaction: "🤖"
-},
-async (from, conn, context) => {
+  {
+    nomCom: "gpt",
+    categorie: "AI",
+    reaction: "🤖",
+    alias: ["gpt5", "ai5", "askgpt", "wolfai"]
+  },
+  async (dest, zk, context) => {
+    const { arg, repondre, ms } = context;
 
-  const { arg } = context;
-  const q = arg.join(" ").toLowerCase().trim();
-
-  try {
-
-    /* ===== BOT NAME RESPONSE ===== */
-    if (
-      q === "unaitwa nani" ||
-      q === "wewe unaitwa nani" ||
-      q === "what is your name" ||
-      q === "what's your name"
-    ) {
-      return conn.sendMessage(
-        from,
-        {
-          text:
-`╭───〔 GPT AI 〕───
-│
-My name is Bmb Tech Ai
-│
-╰──────────────`,
-          contextInfo: newsletterContext
-        },
-        { quoted: verifiedContact }
+    /* ===== HELP ===== */
+    if (!arg[0] || arg[0].toLowerCase() === "help") {
+      return repondre(
+        "🤖 *B.M.B GPT-5*\n\n" +
+        "📌 *Usage:*\n" +
+        "• .gpt hello\n" +
+        "• .gpt code javascript function\n" +
+        "• .gpt creative short story\n" +
+        "• .gpt explain async await\n"
       );
     }
 
-    /* ===== NO QUESTION ===== */
-    if (!q) {
-      return conn.sendMessage(
-        from,
-        {
-          text:
-`╭───〔 GPT AI 〕───
-│
-Usage:
-.gpt your question
-│
-Example:
-.gpt Hello
-│
-╰──────────────`,
-          contextInfo: newsletterContext
-        },
-        { quoted: verifiedContact }
-      );
+    /* ===== MODES ===== */
+    const specialCommands = {
+      code: "code",
+      program: "code",
+      coding: "code",
+      creative: "creative",
+      write: "creative",
+      story: "creative",
+      explain: "explain",
+      whatis: "explain",
+      define: "explain"
+    };
+
+    let query = arg.join(" ");
+    let mode = "general";
+    let enhancedPrompt = query;
+
+    const firstWord = arg[0].toLowerCase();
+    if (specialCommands[firstWord]) {
+      mode = specialCommands[firstWord];
+      query = arg.slice(1).join(" ");
+
+      if (!query) return repondre("❌ Please provide your question.");
+
+      if (mode === "code") {
+        enhancedPrompt =
+          `You are an expert programmer. Provide clean and efficient code with explanation.\nQuestion: ${query}`;
+      } else if (mode === "creative") {
+        enhancedPrompt =
+          `You are a creative writer. Be imaginative and engaging.\nWrite: ${query}`;
+      } else if (mode === "explain") {
+        enhancedPrompt =
+          `You are a teacher. Explain clearly with examples.\nTopic: ${query}`;
+      }
     }
 
-    /* ===== GPT API ===== */
-    const apiUrl =
-      `https://lance-frank-asta.onrender.com/api/gpt?q=${encodeURIComponent(q)}`;
+    try {
+      /* ===== REACT ===== */
+      await zk.sendMessage(dest, {
+        react: { text: "⏳", key: ms.key }
+      });
 
-    const { data } = await axios.get(apiUrl);
-
-    if (!data || !data.message) {
-      return conn.sendMessage(
-        from,
-        {
-          text: "❌ GPT failed to respond. Please try again later.",
-          contextInfo: newsletterContext
+      /* ===== API REQUEST ===== */
+      const res = await axios.get(API_URL, {
+        params: {
+          apikey: API_KEY,
+          text: enhancedPrompt
         },
-        { quoted: verifiedContact }
+        timeout: 35000
+      });
+
+      const data = res.data;
+      let aiResponse = "";
+
+      if (data?.status && data.result) {
+        aiResponse = data.result;
+      } else if (data?.response) {
+        aiResponse = data.response;
+      } else if (data?.answer) {
+        aiResponse = data.answer;
+      } else {
+        aiResponse = JSON.stringify(data, null, 2).slice(0, 1500);
+      }
+
+      aiResponse = formatResponse(aiResponse, mode);
+
+      if (aiResponse.length > 3000) {
+        aiResponse = aiResponse.slice(0, 3000) + "\n\n...truncated";
+      }
+
+      /* ===== FINAL MESSAGE ===== */
+      let text =
+        "🤖 *B.M.B GPT-5*\n\n";
+
+      if (mode !== "general") {
+        const icons = {
+          code: "👨‍💻",
+          creative: "🎨",
+          explain: "📘"
+        };
+        text += `${icons[mode]} *Mode:* ${mode.toUpperCase()}\n\n`;
+      }
+
+      text +=
+        `🎯 *Question:*\n${query.slice(0, 100)}\n\n` +
+        `✨ *Response:*\n${aiResponse}\n\n` +
+        "⚡ *Powered by B.M.B TECH*";
+
+      await zk.sendMessage(dest, { text });
+
+    } catch (err) {
+      console.error("GPT ERROR:", err.response?.data || err);
+      repondre(
+        "❌ *GPT-5 Error*\n\n" +
+        "• API may be down\n" +
+        "• Try again later\n" +
+        "• Use shorter questions"
       );
     }
-
-    return conn.sendMessage(
-      from,
-      {
-        text:
-`╭───〔 GPT RESPONSE 〕───
-│
-${data.message}
-│
-╰──────────────`,
-        contextInfo: newsletterContext
-      },
-      { quoted: verifiedContact }
-    );
-
-  } catch (error) {
-    console.error("GPT ERROR:", error);
-
-    return conn.sendMessage(
-      from,
-      {
-        text: "❌ An error occurred while communicating with the GPT.",
-        contextInfo: newsletterContext
-      },
-      { quoted: verifiedContact }
-    );
   }
-});
+);
+
+/* ===== HELPERS ===== */
+
+function formatResponse(text, mode) {
+  if (!text) return "";
+
+  if (mode === "code" && !text.includes("```")) {
+    return "```" + "\n" + text + "\n```";
+  }
+
+  if (mode === "creative") {
+    return text.replace(/\n\s*\n/g, "\n\n");
+  }
+
+  return text;
+}
